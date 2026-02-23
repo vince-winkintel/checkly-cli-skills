@@ -7,8 +7,18 @@ requirements:
     - npx
   binaries_optional:
     - playwright
+  env_vars:
+    - CHECKLY_API_KEY
+    - CHECKLY_ACCOUNT_ID
+  credential:
+    type: api_key
+    env_var: CHECKLY_API_KEY
+    companion_env_var: CHECKLY_ACCOUNT_ID
+    docs_url: https://www.checklyhq.com/docs/cli/authentication/
+    storage_path: ~/.config/@checkly/cli/config.json
   notes: |
     Requires Checkly account and API key (signup at checklyhq.com/signup or via 'npx checkly login').
+    Credentials can be set via environment variables (CHECKLY_API_KEY, CHECKLY_ACCOUNT_ID) or stored in ~/.config/@checkly/cli/config.json via 'npx checkly login'.
     Config stored in checkly.config.ts and auth credentials in system config.
     Browser checks require @playwright/test dependency.
 ---
