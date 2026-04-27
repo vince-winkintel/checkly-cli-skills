@@ -138,17 +138,21 @@ Shows full request/response details.
 ### Environment Variable Not Working
 
 ```typescript
+// Note: API_BASE_URL and API_TOKEN are examples of user-defined variables
+// for your own checks. They are NOT required by Checkly CLI itself.
+// Define them based on your application's needs.
+
 // ✅ Correct usage
 request: {
-  url: '{{API_BASE_URL}}/users',
+  url: '{{API_BASE_URL}}/users',  // Your custom base URL variable
   headers: [
-    { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },
+    { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },  // Your custom auth token
   ],
 }
 
 environmentVariables: [
   { key: 'API_BASE_URL', value: 'https://api.example.com' },
-  { key: 'API_TOKEN', value: process.env.API_TOKEN! },
+  { key: 'API_TOKEN', value: process.env.API_TOKEN! },  // Load from your .env
 ]
 ```
 
