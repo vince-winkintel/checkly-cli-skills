@@ -42,6 +42,7 @@ npx checkly deploy [options]
 | Flag | Description |
 |------|-------------|
 | `--force, -f` | Skip confirmation prompt |
+| `--verbose, -v` | Show created/updated resource names and IDs during deploy output |
 | `--config=<path>` | Path to checkly.config.ts |
 | `--verify-runtime-dependencies` | Validate npm package compatibility |
 
@@ -73,6 +74,17 @@ npx checkly deploy --force
 # No confirmation prompt
 # Useful for automated pipelines
 ```
+
+### Verbose deployment output
+
+```bash
+npx checkly deploy --verbose
+
+# Shows created/updated resources with human-readable names and IDs
+# Useful when auditing exactly which Checkly resources changed
+```
+
+`--verbose` is most helpful when you need to match deploy output back to specific Checkly resources during debugging or rollout review.
 
 ### Preview changes
 
@@ -304,7 +316,7 @@ curl https://api.checklyhq.com/health
 npx checkly whoami
 
 # Try again with verbose output
-npx checkly deploy --force
+npx checkly deploy --verbose --force
 ```
 
 ## Related Skills
