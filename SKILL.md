@@ -177,6 +177,23 @@ git add .
 git commit -m "Import existing monitoring checks"
 ```
 
+### Inspect deployed check failures
+
+```bash
+# List failing checks
+npx checkly checks list --status failing
+
+# Inspect a deployed check and recent runs
+npx checkly checks get <check-id>
+npx checkly checks get <check-id> --output json
+
+# Drill into an error group or specific result
+npx checkly checks get <check-id> --error-group <error-group-id>
+npx checkly checks get <check-id> --result <result-id>
+```
+
+When investigating a deployed failure, look for `errorGroups`, `rootCause`, or `RCA` fields in the output. If Checkly already surfaced Rocky AI root-cause analysis, reuse that context before suggesting additional debugging steps.
+
 ## Decision Trees
 
 ### "What type of check should I create?"

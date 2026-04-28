@@ -428,6 +428,45 @@ new ApiCheck('api-check', {
 })
 ```
 
+## Inspect deployed checks
+
+Use these commands when you need to inspect checks that are already deployed in Checkly.
+
+### List checks
+
+```bash
+npx checkly checks list
+npx checkly checks list --status failing
+npx checkly checks list --tag production --type PLAYWRIGHT
+npx checkly checks list --search "Homepage" --output json
+```
+
+### Get check details
+
+```bash
+npx checkly checks get <check-id>
+npx checkly checks get <check-id> --output json
+npx checkly checks get <check-id> --stats-range last7Days --group-by location
+```
+
+Look for `errorGroups`, `rootCause`, or `RCA` in the output when investigating failures. If Rocky AI already evaluated the issue, reuse that context in your diagnosis instead of restating the same first-pass analysis.
+
+### Drill into a result or error group
+
+```bash
+npx checkly checks get <check-id> --result <result-id>
+npx checkly checks get <check-id> --error-group <error-group-id>
+```
+
+### View check stats
+
+```bash
+npx checkly checks stats
+npx checkly checks stats --range last7Days --tag production
+npx checkly checks stats <check-id-1> <check-id-2>
+npx checkly checks stats --output json
+```
+
 ## Troubleshooting
 
 ### Check fails locally but passes in UI

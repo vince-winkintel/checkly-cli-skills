@@ -1,0 +1,10 @@
+1.0.3
+
+Release/version change metadata for this skill set lives here, not in individual skill files.
+
+Historical notes consolidated from skill docs:
+- checkly-cli v7.12.1
+  - Reviewed upstream compare `7.12.0...7.12.1` on 2026-04-28.
+  - No user-facing CLI commands, flags, auth/config flows, or output formats changed in this release.
+  - The only upstream delta was docs guidance for `npx checkly checks get`: when investigating failures, reuse Rocky AI root-cause analysis surfaced via `errorGroups`, `rootCause`, or `RCA` when available.
+  - Updated the top-level skill docs, README, `checkly-checks`, and troubleshooting reference to reflect that investigation guidance.
