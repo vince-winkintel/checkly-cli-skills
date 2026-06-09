@@ -17,6 +17,7 @@ npx skills add vince-winkintel/checkly-cli-skills
 ### Getting Started
 - **[checkly-auth](./checkly-auth)** - Authentication and login
 - **[checkly-config](./checkly-config)** - Configuration files and project setup
+- **[checkly-members](./checkly-members)** - Account member and pending-invite listing, role updates, and removals
 
 ### Core Workflows
 - **[checkly-test](./checkly-test)** - Local testing with `npx checkly test`
@@ -44,6 +45,8 @@ Example prompts for AI agents:
 - "Deploy checks to Checkly cloud"
 - "Import existing checks from Checkly UI"
 - "Configure retry strategy for failed checks"
+- "Audit Checkly account members and pending invites"
+- "Inspect a recorded Checkly test session failure"
 
 ## Templates
 

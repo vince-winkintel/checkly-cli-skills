@@ -72,6 +72,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 **Getting Started:**
 - `checkly-auth` - Authentication setup and login
 - `checkly-config` - Configuration files (checkly.config.ts) and project structure
+- `checkly-members` - Account member and pending-invite listing, role updates, and removals
 
 **Core Workflows:**
 - `checkly-test` - Local testing workflow with npx checkly test
@@ -87,6 +88,10 @@ This skill routes to specialized sub-skills by Checkly domain:
 - `checkly-constructs` - Constructs system and resource management
 - `checkly-playwright` - Playwright test suites and configuration
 - `checkly-advanced` - Retry strategies, reporters, environment variables, bundling
+
+**Operations:**
+- `checkly-members` - Audit and manage Checkly account access with `npx checkly members`
+- `checkly-test` - Also covers `npx checkly test-sessions` for recorded test-session drilldown and RCA context
 
 ## When to use Checkly CLI vs Web UI
 

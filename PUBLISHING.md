@@ -108,8 +108,8 @@ which npx
 clawhub publish . \
   --slug checkly-cli-skills \
   --name "Checkly CLI Skills" \
-  --version 1.0.3 \
-  --changelog "Fix ClawHub metadata format and clarify example env vars"
+  --version 1.0.4 \
+  --changelog "Refresh Checkly CLI skills for 8.7.0 members and test-sessions commands"
 ```
 
 ### 4. Verify Published Metadata
@@ -132,7 +132,7 @@ If metadata is missing or incorrect, the frontmatter format may be wrong.
 In a clean environment, test installation:
 
 ```bash
-clawhub install checkly-cli-skills --version 1.0.3
+clawhub install checkly-cli-skills --version 1.0.4
 ```
 
 Verify ClawHub warns about missing binaries/env vars if they're not available.
@@ -165,6 +165,7 @@ head -40 SKILL.md | grep -A 30 "metadata:" | python3 -m json.tool
 
 - **v1.0.2** - Added `checkly deploy --verbose` documentation
 - **v1.0.3** - Fixed ClawHub metadata format and clarified example env vars
+- **v1.0.4** - Refreshed Checkly CLI 8.7.0 coverage for members and test-sessions commands
 
 ## References
 

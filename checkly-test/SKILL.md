@@ -21,6 +21,13 @@ npx checkly test --verbose
 
 # Test in specific location
 npx checkly test --location=eu-west-1
+
+# List recorded test sessions after CI or cloud runs
+npx checkly test-sessions list --status failed --limit 10
+
+# Drill into a failed session and a specific result/error group
+npx checkly test-sessions get <session-id> --result <result-id>
+npx checkly test-sessions get <session-id> --error-group <error-group-id> --full-error
 ```
 
 ## How it works
@@ -49,6 +56,57 @@ npx checkly test [file-pattern] [options]
 | `--verify-runtime-dependencies` | Validate npm package versions |
 | `--env-file=<path>` | Load environment variables from file |
 | `--grep=<pattern>` | Filter checks by name pattern |
+
+## Recorded test sessions
+
+Checkly CLI v8.7.0 added `test-sessions` drilldown commands for recorded sessions. Use these after `npx checkly test`, `npx checkly trigger`, CI runs, or Playwright Reporter uploads when you need failure details, result IDs, or error-group context for RCA.
+
+```bash
+# List recent sessions
+npx checkly test-sessions list
+
+# List failed sessions from a branch as JSON
+npx checkly test-sessions list --status failed --branch main --limit 20 --output json
+
+# Filter sessions by provider or error group
+npx checkly test-sessions list --provider github --error-group <error-group-id>
+
+# Inspect a session summary and error-group IDs
+npx checkly test-sessions get <session-id>
+
+# Wait for a running session to finish before rendering
+npx checkly test-sessions get <session-id> --watch
+
+# Drill into one result or one error group
+npx checkly test-sessions get <session-id> --result <result-id>
+npx checkly test-sessions get <session-id> --error-group <error-group-id> --full-error
+```
+
+### `test-sessions list` flags
+
+| Flag | Description |
+|------|-------------|
+| `--limit`, `-l` | Number of sessions to return (1-100; default 20). |
+| `--cursor` | Cursor from previous output for pagination. |
+| `--from` / `--to` | ISO date or Unix timestamp range filters. |
+| `--status` | Filter by `running`, `failed`, `passed`, or `cancelled`; repeatable. |
+| `--branch` | Filter by Git branch; repeatable. |
+| `--user` / `--no-users` | Filter by commit owner/invoking user, or include sessions without users. |
+| `--provider` | Filter by `github`, `vercel`, `api`, `trigger`, or `pw_reporter`; repeatable. |
+| `--search`, `-s` | Search session text fields (3-200 characters). |
+| `--error-group` | Filter by test-session error group ID. |
+| `--output`, `-o` | Output format: `table`, `json`, or `md`. |
+
+### `test-sessions get` flags
+
+| Flag | Description |
+|------|-------------|
+| `--result`, `-r` | Show details for a specific test-session result ID. |
+| `--error-group` | Show details for an error group ID from the session. |
+| `--error-groups-limit` | Number of error-group IDs to show in the summary (default 5). |
+| `--full-error` | Print complete raw error for an error group. |
+| `--watch`, `-w` | Watch a running session until it completes before rendering. |
+| `--output`, `-o` | Output format: `detail`, `json`, or `md`. |
 
 ## Workflows
 
