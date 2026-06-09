@@ -42,13 +42,17 @@ new ApiCheck('api-status-check', {
 ### API check with headers
 
 ```typescript
+// Note: API_TOKEN is a user-defined environment variable for YOUR API checks.
+// It is NOT required by Checkly CLI itself. Define it in your .env or CI secrets
+// based on your application's authentication needs.
+
 new ApiCheck('authenticated-api-check', {
   name: 'Authenticated API',
   request: {
     url: 'https://api.example.com/user/profile',
     method: 'GET',
     headers: [
-      { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },
+      { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },  // Your custom token
       { key: 'Content-Type', value: 'application/json' },
     ],
     assertions: [
@@ -197,11 +201,15 @@ test('homepage loads successfully', async ({ page }) => {
 // __checks__/login.spec.ts
 import { test, expect } from '@playwright/test'
 
+// Note: TEST_EMAIL and TEST_PASSWORD are user-defined environment variables
+// for YOUR specific checks - NOT required by Checkly CLI itself.
+// Set them in your local .env or CI/CD secrets as needed for your app.
+
 test('user can login', async ({ page }) => {
   // Navigate to login page
   await page.goto('https://app.example.com/login')
   
-  // Fill credentials
+  // Fill credentials (using your own env vars)
   await page.fill('input[name="email"]', process.env.TEST_EMAIL!)
   await page.fill('input[name="password"]', process.env.TEST_PASSWORD!)
   
