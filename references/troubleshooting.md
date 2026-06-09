@@ -127,13 +127,22 @@ npx checkly validate
 
 ### Assertion Failures
 
-Use verbose mode to debug:
+Use verbose mode to debug local test execution:
 
 ```bash
 npx checkly test --verbose
 ```
 
 Shows full request/response details.
+
+For deployed failures, inspect the check record and recent runs:
+
+```bash
+npx checkly checks get <check-id>
+npx checkly checks get <check-id> --output json
+```
+
+Look for `errorGroups`, `rootCause`, or `RCA` fields. If Rocky AI already produced a root-cause analysis, reuse that before adding more manual debugging advice.
 
 ### Environment Variable Not Working
 
