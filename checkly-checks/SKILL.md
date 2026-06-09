@@ -42,13 +42,17 @@ new ApiCheck('api-status-check', {
 ### API check with headers
 
 ```typescript
+// Note: API_TOKEN is a user-defined environment variable for YOUR API checks.
+// It is NOT required by Checkly CLI itself. Define it in your .env or CI secrets
+// based on your application's authentication needs.
+
 new ApiCheck('authenticated-api-check', {
   name: 'Authenticated API',
   request: {
     url: 'https://api.example.com/user/profile',
     method: 'GET',
     headers: [
-      { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },
+      { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },  // Your custom token
       { key: 'Content-Type', value: 'application/json' },
     ],
     assertions: [
@@ -197,11 +201,15 @@ test('homepage loads successfully', async ({ page }) => {
 // __checks__/login.spec.ts
 import { test, expect } from '@playwright/test'
 
+// Note: TEST_EMAIL and TEST_PASSWORD are user-defined environment variables
+// for YOUR specific checks - NOT required by Checkly CLI itself.
+// Set them in your local .env or CI/CD secrets as needed for your app.
+
 test('user can login', async ({ page }) => {
   // Navigate to login page
   await page.goto('https://app.example.com/login')
   
-  // Fill credentials
+  // Fill credentials (using your own env vars)
   await page.fill('input[name="email"]', process.env.TEST_EMAIL!)
   await page.fill('input[name="password"]', process.env.TEST_PASSWORD!)
   
@@ -426,6 +434,45 @@ new ApiCheck('api-check', {
     assertions: standardAssertions,
   },
 })
+```
+
+## Inspect deployed checks
+
+Use these commands when you need to inspect checks that are already deployed in Checkly.
+
+### List checks
+
+```bash
+npx checkly checks list
+npx checkly checks list --status failing
+npx checkly checks list --tag production --type PLAYWRIGHT
+npx checkly checks list --search "Homepage" --output json
+```
+
+### Get check details
+
+```bash
+npx checkly checks get <check-id>
+npx checkly checks get <check-id> --output json
+npx checkly checks get <check-id> --stats-range last7Days --group-by location
+```
+
+Look for `errorGroups`, `rootCause`, or `RCA` in the output when investigating failures. If Rocky AI already evaluated the issue, reuse that context in your diagnosis instead of restating the same first-pass analysis.
+
+### Drill into a result or error group
+
+```bash
+npx checkly checks get <check-id> --result <result-id>
+npx checkly checks get <check-id> --error-group <error-group-id>
+```
+
+### View check stats
+
+```bash
+npx checkly checks stats
+npx checkly checks stats --range last7Days --tag production
+npx checkly checks stats <check-id-1> <check-id-2>
+npx checkly checks stats --output json
 ```
 
 ## Troubleshooting

@@ -127,6 +127,23 @@ npx checkly test
 npx checkly deploy
 ```
 
+## Investigating deployed failures
+
+```bash
+# List failing checks
+npx checkly checks list --status failing
+
+# Inspect the deployed check and recent runs
+npx checkly checks get <check-id>
+npx checkly checks get <check-id> --output json
+
+# Drill into a specific result or error group
+npx checkly checks get <check-id> --result <result-id>
+npx checkly checks get <check-id> --error-group <error-group-id>
+```
+
+When Checkly exposes `errorGroups`, `rootCause`, or `RCA` in `checks get` output, reuse that Rocky AI analysis before proposing extra debugging steps.
+
 ## Documentation
 
 - [Checkly CLI Documentation](https://www.checklyhq.com/docs/cli/)

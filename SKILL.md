@@ -1,26 +1,40 @@
 ---
 name: checkly-cli-skills
 description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, check deployment, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, testing, deployment, imports, constructs, and advanced patterns. Triggers on checkly, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
-requirements:
-  binaries:
-    - checkly
-    - npx
-  binaries_optional:
-    - playwright
-  env_vars:
-    - CHECKLY_API_KEY
-    - CHECKLY_ACCOUNT_ID
-  credential:
-    type: api_key
-    env_var: CHECKLY_API_KEY
-    companion_env_var: CHECKLY_ACCOUNT_ID
-    docs_url: https://www.checklyhq.com/docs/cli/authentication/
-    storage_path: ~/.config/@checkly/cli/config.json
-  notes: |
-    Requires Checkly account and API key (signup at checklyhq.com/signup or via 'npx checkly login').
-    Credentials can be set via environment variables (CHECKLY_API_KEY, CHECKLY_ACCOUNT_ID) or stored in ~/.config/@checkly/cli/config.json via 'npx checkly login'.
-    Config stored in checkly.config.ts and auth credentials in system config.
-    Browser checks require @playwright/test dependency.
+metadata:
+  {
+    "openclaw":
+      {
+        "emoji": "✓",
+        "requires": { "bins": ["checkly", "npx"], "env": ["CHECKLY_API_KEY", "CHECKLY_ACCOUNT_ID"] },
+        "primaryEnv": "CHECKLY_API_KEY",
+        "install":
+          [
+            {
+              "id": "npm-create",
+              "kind": "node",
+              "package": "checkly",
+              "bins": ["checkly"],
+              "label": "Create Checkly project (npm)",
+              "command": "npm create checkly@latest",
+            },
+            {
+              "id": "npm-global",
+              "kind": "npm",
+              "package": "checkly",
+              "bins": ["checkly"],
+              "label": "Install Checkly CLI globally (npm)",
+            },
+          ],
+        "notes":
+          [
+            "Requires Checkly account and API key (signup at checklyhq.com/signup or via 'npx checkly login').",
+            "Credentials can be set via environment variables (CHECKLY_API_KEY, CHECKLY_ACCOUNT_ID) or stored in ~/.config/@checkly/cli/config.json via 'npx checkly login'.",
+            "Config stored in checkly.config.ts and auth credentials in system config.",
+            "Browser checks optionally require playwright binary and @playwright/test dependency.",
+          ],
+      },
+  }
 ---
 
 # Checkly CLI Skills
@@ -181,6 +195,23 @@ git diff
 git add .
 git commit -m "Import existing monitoring checks"
 ```
+
+### Inspect deployed check failures
+
+```bash
+# List failing checks
+npx checkly checks list --status failing
+
+# Inspect a deployed check and recent runs
+npx checkly checks get <check-id>
+npx checkly checks get <check-id> --output json
+
+# Drill into an error group or specific result
+npx checkly checks get <check-id> --error-group <error-group-id>
+npx checkly checks get <check-id> --result <result-id>
+```
+
+When investigating a deployed failure, look for `errorGroups`, `rootCause`, or `RCA` fields in the output. If Checkly already surfaced Rocky AI root-cause analysis, reuse that context before suggesting additional debugging steps.
 
 ## Decision Trees
 

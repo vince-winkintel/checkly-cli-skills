@@ -127,7 +127,7 @@ npx checkly validate
 
 ### Assertion Failures
 
-Use verbose mode to debug:
+Use verbose mode to debug local test execution:
 
 ```bash
 npx checkly test --verbose
@@ -135,20 +135,33 @@ npx checkly test --verbose
 
 Shows full request/response details.
 
+For deployed failures, inspect the check record and recent runs:
+
+```bash
+npx checkly checks get <check-id>
+npx checkly checks get <check-id> --output json
+```
+
+Look for `errorGroups`, `rootCause`, or `RCA` fields. If Rocky AI already produced a root-cause analysis, reuse that before adding more manual debugging advice.
+
 ### Environment Variable Not Working
 
 ```typescript
+// Note: API_BASE_URL and API_TOKEN are examples of user-defined variables
+// for your own checks. They are NOT required by Checkly CLI itself.
+// Define them based on your application's needs.
+
 // ✅ Correct usage
 request: {
-  url: '{{API_BASE_URL}}/users',
+  url: '{{API_BASE_URL}}/users',  // Your custom base URL variable
   headers: [
-    { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },
+    { key: 'Authorization', value: 'Bearer {{API_TOKEN}}' },  // Your custom auth token
   ],
 }
 
 environmentVariables: [
   { key: 'API_BASE_URL', value: 'https://api.example.com' },
-  { key: 'API_TOKEN', value: process.env.API_TOKEN! },
+  { key: 'API_TOKEN', value: process.env.API_TOKEN! },  // Load from your .env
 ]
 ```
 

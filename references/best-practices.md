@@ -68,19 +68,33 @@ new ApiCheck('super-critical', {
 
 ### Environment Variables
 
+**Checkly CLI Authentication** (required for deployment):
+```bash
+# Required by Checkly CLI for 'npx checkly deploy'
+CHECKLY_API_KEY=cu_xxx
+CHECKLY_ACCOUNT_ID=12345
+```
+
+**Your Check-Specific Variables** (examples only - define as needed for your own checks):
+
 **Local Development**:
 ```bash
 # .env.local (add to .gitignore)
-API_TOKEN=dev-token-123
-TEST_EMAIL=test@example.com
+# Example variables for YOUR checks - NOT required by Checkly CLI itself
+API_TOKEN=dev-token-123          # Example: if your API check needs auth
+TEST_EMAIL=test@example.com      # Example: if your browser check tests login
+TEST_PASSWORD=test-pass-123      # Example: if your browser check tests login
 ```
 
 **Production (CI/CD)**:
 ```bash
-# Use encrypted secrets
+# Required by Checkly CLI
 CHECKLY_API_KEY=cu_xxx
 CHECKLY_ACCOUNT_ID=12345
+
+# Your check-specific variables (examples)
 API_TOKEN=prod-token-xyz
+TEST_EMAIL=prod-test@example.com
 ```
 
 ## Check Creation
