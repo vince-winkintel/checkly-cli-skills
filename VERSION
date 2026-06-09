@@ -1,8 +1,12 @@
-1.0.3
+1.0.4
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.7.0
+  - Reviewed `npx -y checkly@8.7.0` help output on 2026-06-09.
+  - Added `checkly-members` coverage for `npx checkly members`, `members update`, and `members delete` account-access workflows.
+  - Added `checkly-test` coverage for `npx checkly test-sessions list` and `test-sessions get` recorded-session drilldown workflows.
 - checkly-cli v7.12.1
   - Reviewed upstream compare `7.12.0...7.12.1` on 2026-04-28.
   - No user-facing CLI commands, flags, auth/config flows, or output formats changed in this release.
