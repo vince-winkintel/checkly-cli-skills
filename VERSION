@@ -3,6 +3,10 @@
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.8.0
+  - Reviewed `npx -y checkly@8.8.0` release notes and help output on 2026-06-16.
+  - Added `checkly-assets` coverage for `npx checkly assets list` and `assets download` result-artifact investigation workflows.
+  - Updated `checkly-checks` for `checks delete --dry-run/--force`, `checks get --include-attempts`, result pagination/status filtering, and asset handoff guidance.
 - checkly-cli v8.7.0
   - Reviewed `npx -y checkly@8.7.0` help output on 2026-06-09.
   - Added `checkly-members` coverage for `npx checkly members`, `members update`, and `members delete` account-access workflows.
