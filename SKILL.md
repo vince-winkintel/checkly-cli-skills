@@ -92,6 +92,8 @@ This skill routes to specialized sub-skills by Checkly domain:
 **Operations:**
 - `checkly-members` - Audit and manage Checkly account access with `npx checkly members`
 - `checkly-test` - Also covers `npx checkly test-sessions` for recorded test-session drilldown and RCA context
+- `checkly-checks` - Inspect and delete deployed checks with `npx checkly checks`; use `checks delete --dry-run` before destructive deletes
+- `checkly-assets` - List/download result assets such as logs, traces, videos, screenshots, pcap, reports, and files for failure investigation
 
 ## When to use Checkly CLI vs Web UI
 

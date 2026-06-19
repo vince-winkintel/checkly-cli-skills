@@ -462,6 +462,7 @@ npx checkly checks list --search "Homepage" --output json
 npx checkly checks get <check-id>
 npx checkly checks get <check-id> --output json
 npx checkly checks get <check-id> --stats-range last7Days --group-by location
+npx checkly checks get <check-id> --results-limit 20 --filter-status failure
 ```
 
 Look for `errorGroups`, `rootCause`, or `RCA` in the output when investigating failures. If Rocky AI already evaluated the issue, reuse that context in your diagnosis instead of restating the same first-pass analysis.
@@ -491,8 +492,29 @@ Analyze only confirmed fields: `activated`, `muted`, `groupId`, `alertSettings`,
 
 ```bash
 npx checkly checks get <check-id> --result <result-id>
+npx checkly checks get <check-id> --result <result-id> --include-attempts
 npx checkly checks get <check-id> --error-group <error-group-id>
 ```
+
+Use `--include-attempts` with `--result` when retry strategy details matter; Checkly CLI v8.8.0 surfaces individual retry-attempt detail for a selected result.
+
+### Delete a deployed check
+
+```bash
+npx checkly checks delete <check-id> --dry-run
+npx checkly checks delete <check-id> --force
+```
+
+Deletion is destructive. Checks managed by a CLI project are recreated on the next deploy, so remove those from project code instead of deleting only the deployed copy. Always run `--dry-run` first and get explicit user approval before running `--force`.
+
+### Result assets
+
+```bash
+npx checkly assets list --check-id <check-id> --result-id <result-id>
+npx checkly assets download --check-id <check-id> --result-id <result-id> --type trace --dir ./checkly-assets
+```
+
+Use `checkly-assets` when you need logs, traces, videos, screenshots, pcap captures, reports, or files attached to a failed result.
 
 ### View check stats
 

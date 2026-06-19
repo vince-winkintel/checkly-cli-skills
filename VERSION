@@ -9,6 +9,10 @@ Historical notes consolidated from skill docs:
   - Updated Slack alert-channel guidance to prefer `SlackAppAlertChannel` for new Slack notifications and reserve legacy webhook-style Slack channels for existing setups.
   - Noted that `checks get` detail/markdown recent-results output is now internally field-projected for performance while `--output json`, `--result`, and `--include-attempts` preserve full result payload behavior.
   - Reviewed agentic test-session cancellation changes; no public command or flag changes were exposed by `checkly@8.9.0 --help`.
+- checkly-cli v8.8.0
+  - Reviewed `npx -y checkly@8.8.0` release notes and help output on 2026-06-16.
+  - Added `checkly-assets` coverage for `npx checkly assets list` and `assets download` result-artifact investigation workflows.
+  - Updated `checkly-checks` for `checks delete --dry-run/--force`, `checks get --include-attempts`, result pagination/status filtering, and asset handoff guidance.
 - checkly-cli v8.7.0
   - Reviewed `npx -y checkly@8.7.0` help output on 2026-06-09.
   - Added `checkly-members` coverage for `npx checkly members`, `members update`, and `members delete` account-access workflows.
