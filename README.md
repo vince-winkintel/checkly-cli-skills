@@ -47,6 +47,7 @@ Example prompts for AI agents:
 - "Configure retry strategy for failed checks"
 - "Audit Checkly account members and pending invites"
 - "Inspect a recorded Checkly test session failure"
+- "Investigate why a Checkly alert did or did not fire"
 
 ## Templates
 
@@ -143,6 +144,8 @@ npx checkly checks get <check-id> --error-group <error-group-id>
 ```
 
 When Checkly exposes `errorGroups`, `rootCause`, or `RCA` in `checks get` output, reuse that Rocky AI analysis before proposing extra debugging steps.
+
+For alerting investigations, prefer read-only JSON/API evidence over table output. Inspect the selected check, any matching group, and referenced alert-channel subscriptions; do not guess account/global alerting endpoints if the CLI/API output does not expose those fields. Report global alert settings as selected-but-unavailable when `useGlobalAlertSettings: true` is the only evidence.
 
 ## Documentation
 

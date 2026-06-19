@@ -61,6 +61,8 @@ npx checkly test [file-pattern] [options]
 
 Checkly CLI v8.7.0 added `test-sessions` drilldown commands for recorded sessions. Use these after `npx checkly test`, `npx checkly trigger`, CI runs, or Playwright Reporter uploads when you need failure details, result IDs, or error-group context for RCA.
 
+Checkly CLI v8.9.0 improved cancellation handling for agentic runs started by `checkly test`, `checkly trigger`, and `checkly pw-test`. This is backend/runner wiring rather than a new public `test-sessions` command or flag; use the existing commands below to inspect the recorded session after a cancelled or timed-out run.
+
 ```bash
 # List recent sessions
 npx checkly test-sessions list

@@ -108,7 +108,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 - Viewing dashboards and historical results
 - Analyzing check failures and incidents
 - Managing account-level settings
-- Configuring alert channels (email, Slack, PagerDuty)
+- Configuring alert channels (email, Slack App, PagerDuty)
 - Setting up private locations
 
 ## Common workflows
@@ -212,6 +212,16 @@ npx checkly checks get <check-id> --result <result-id>
 ```
 
 When investigating a deployed failure, look for `errorGroups`, `rootCause`, or `RCA` fields in the output. If Checkly already surfaced Rocky AI root-cause analysis, reuse that context before suggesting additional debugging steps.
+
+For alerting questions, use read-only JSON/API evidence before table output:
+
+```bash
+npx checkly checks get <check-id> --output json
+npx checkly api /v1/checks/<check-id>
+npx checkly alert-channels list --output json --limit 100
+```
+
+Only fetch alert-channel details for channel IDs referenced by the selected check or matching group. If the check has a `groupId`, inspect groups once with `npx checkly api /v1/check-groups` and locate the matching group. Do not probe guessed account/global alerting endpoints; if output only shows `useGlobalAlertSettings: true`, say global alert settings are selected but their policy details were not available in the inspected CLI/API output.
 
 ## Decision Trees
 
