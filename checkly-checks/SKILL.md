@@ -467,7 +467,7 @@ npx checkly checks get <check-id> --results-limit 20 --filter-status failure
 
 Look for `errorGroups`, `rootCause`, or `RCA` in the output when investigating failures. If Rocky AI already evaluated the issue, reuse that context in your diagnosis instead of restating the same first-pass analysis.
 
-For `checks get` in Checkly CLI v8.9.0+, detail and markdown output use an internal field projection for the recent-results table to avoid fetching full result bodies. Use `--output json` when you need complete result payloads; `--result <result-id>` and `--include-attempts` still request the full detail payloads.
+For `checks get`, detail and markdown output use an internal field projection for the recent-results table to avoid fetching full result bodies. Use `--output json` when you need complete result payloads; `--result <result-id>` and `--include-attempts` still request the full detail payloads.
 
 ### Investigate alerting behavior
 
@@ -496,7 +496,7 @@ npx checkly checks get <check-id> --result <result-id> --include-attempts
 npx checkly checks get <check-id> --error-group <error-group-id>
 ```
 
-Use `--include-attempts` with `--result` when retry strategy details matter; Checkly CLI v8.8.0 surfaces individual retry-attempt detail for a selected result.
+Use `--include-attempts` with `--result` when retry strategy details matter; the output surfaces individual retry-attempt detail for a selected result.
 
 ### Delete a deployed check
 
