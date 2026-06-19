@@ -144,6 +144,18 @@ npx checkly checks get <check-id> --output json
 
 Look for `errorGroups`, `rootCause`, or `RCA` fields. If Rocky AI already produced a root-cause analysis, reuse that before adding more manual debugging advice.
 
+### Alert Did Not Fire
+
+Use read-only structured evidence; table output can omit critical alerting fields.
+
+```bash
+npx checkly checks get <check-id> --output json
+npx checkly api /v1/checks/<check-id>
+npx checkly alert-channels list --output json --limit 100
+```
+
+If the check has a `groupId`, fetch groups once with `npx checkly api /v1/check-groups` and locate the matching group. Compare only confirmed `activated`, `muted`, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `retryStrategy`, and `doubleCheck` fields. Do not probe guessed account/global alert endpoints; if only `useGlobalAlertSettings: true` is visible, report that the global policy details were unavailable in the inspected output.
+
 ### Environment Variable Not Working
 
 ```typescript

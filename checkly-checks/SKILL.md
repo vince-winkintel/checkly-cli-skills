@@ -336,15 +336,22 @@ new ApiCheck('tagged-check', {
 ### Alert configuration
 
 ```typescript
-import { EmailAlertChannel } from 'checkly/constructs'
+import { EmailAlertChannel, SlackAppAlertChannel } from 'checkly/constructs'
 
 const emailChannel = new EmailAlertChannel('email-alerts', {
   address: 'team@example.com',
 })
 
+// For new Slack notifications, prefer the Checkly Slack App channel.
+// Use project-discovered #channel names or @user handles; do not invent them.
+const slackAppChannel = new SlackAppAlertChannel('slack-app-alerts', {
+  name: 'Slack App alerts',
+  slackChannels: ['#alerts'],
+})
+
 new ApiCheck('check-with-alerts', {
   name: 'Check with Alerts',
-  alertChannels: [emailChannel],
+  alertChannels: [emailChannel, slackAppChannel],
 })
 ```
 
@@ -460,6 +467,27 @@ npx checkly checks get <check-id> --results-limit 20 --filter-status failure
 
 Look for `errorGroups`, `rootCause`, or `RCA` in the output when investigating failures. If Rocky AI already evaluated the issue, reuse that context in your diagnosis instead of restating the same first-pass analysis.
 
+For `checks get`, detail and markdown output use an internal field projection for the recent-results table to avoid fetching full result bodies. Use `--output json` when you need complete result payloads; `--result <result-id>` and `--include-attempts` still request the full detail payloads.
+
+### Investigate alerting behavior
+
+Use this read-only flow when a user asks why an alert did or did not fire:
+
+```bash
+npx checkly checks list --output json --limit 100 --search "<check-name>"
+npx checkly checks get <check-id> --output json
+npx checkly api /v1/checks/<check-id>
+npx checkly alert-channels list --output json --limit 100
+```
+
+If a selected check has `groupId`, fetch groups once and locate the matching group:
+
+```bash
+npx checkly api /v1/check-groups
+```
+
+Analyze only confirmed fields: `activated`, `muted`, `groupId`, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `retryStrategy`, and `doubleCheck`. For channels, explain whether subscriptions are check-local, group-scoped, active, inactive, or unrelated. Do not use write methods, trigger checks, mutate incidents, or probe guessed account/global alerting endpoints. If output only shows `useGlobalAlertSettings: true`, report that global alert settings are selected but their policy details were not available in the inspected CLI/API output.
+
 ### Drill into a result or error group
 
 ```bash
@@ -468,7 +496,7 @@ npx checkly checks get <check-id> --result <result-id> --include-attempts
 npx checkly checks get <check-id> --error-group <error-group-id>
 ```
 
-Use `--include-attempts` with `--result` when retry strategy details matter; Checkly CLI v8.8.0 surfaces individual retry-attempt detail for a selected result.
+Use `--include-attempts` with `--result` when retry strategy details matter; the output surfaces individual retry-attempt detail for a selected result.
 
 ### Delete a deployed check
 

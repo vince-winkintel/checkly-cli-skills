@@ -1,8 +1,14 @@
-1.0.4
+1.0.5
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.9.0
+  - Reviewed upstream release `8.9.0` on 2026-06-19.
+  - Added alerting-investigation guidance from the upstream Checkly CLI skill reference: use read-only JSON/API evidence, avoid guessed global-alert endpoints, and explain check/group/global alert-setting precedence from confirmed fields only.
+  - Updated Slack alert-channel guidance to prefer `SlackAppAlertChannel` for new Slack notifications and reserve legacy webhook-style Slack channels for existing setups.
+  - Noted that `checks get` detail/markdown recent-results output is now internally field-projected for performance while `--output json`, `--result`, and `--include-attempts` preserve full result payload behavior.
+  - Reviewed agentic test-session cancellation changes; no public command or flag changes were exposed by `checkly@8.9.0 --help`.
 - checkly-cli v8.8.0
   - Reviewed `npx -y checkly@8.8.0` release notes and help output on 2026-06-16.
   - Added `checkly-assets` coverage for `npx checkly assets list` and `assets download` result-artifact investigation workflows.
