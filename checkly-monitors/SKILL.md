@@ -67,6 +67,19 @@ new DnsMonitor('dns-check', {
 })
 ```
 
+Checkly CLI 8.10.0 adds support for HTTPS/SVCB-style DNS records (RFC 9460). Use `recordType: 'HTTPS'` when validating service binding / HTTPS DNS records:
+
+```typescript
+import { DnsMonitor } from 'checkly/constructs'
+
+new DnsMonitor('https-dns-check', {
+  name: 'DNS HTTPS Record',
+  host: 'example.com',
+  recordType: 'HTTPS',
+  expectedValues: ['1 . alpn="h2,h3"'],
+})
+```
+
 ## URL Monitors
 
 Simple HTTP availability checks.

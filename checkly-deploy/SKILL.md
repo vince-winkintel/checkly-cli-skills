@@ -43,6 +43,7 @@ npx checkly deploy [options]
 |------|-------------|
 | `--force, -f` | Skip confirmation prompt |
 | `--verbose, -v` | Show created/updated resource names and IDs during deploy output |
+| `--cancel-in-progress-deployment` | If a deployment for this project is already in progress, cancel it instead of waiting for it to finish |
 | `--config=<path>` | Path to checkly.config.ts |
 | `--verify-runtime-dependencies` | Validate npm package compatibility |
 
@@ -85,6 +86,16 @@ npx checkly deploy --verbose
 ```
 
 `--verbose` is most helpful when you need to match deploy output back to specific Checkly resources during debugging or rollout review.
+
+### Concurrent deployments
+
+Checkly CLI 8.10.0 deploys asynchronously with live progress. If another deployment for the same project is already running, the CLI normally waits for that deployment to finish. Use `--cancel-in-progress-deployment` only when you intentionally want the new deployment to replace the in-flight one:
+
+```bash
+npx checkly deploy --force --cancel-in-progress-deployment
+```
+
+In CI, prefer serializing deploy jobs per environment. Add `--cancel-in-progress-deployment` only for workflows where a newer commit should supersede an older still-running deploy.
 
 ### Preview changes
 
