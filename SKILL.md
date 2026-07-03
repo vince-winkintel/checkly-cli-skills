@@ -52,6 +52,9 @@ npx checkly test
 
 # Deploy to Checkly cloud
 npx checkly deploy
+
+# Inspect Checkly's bundled CLI agent references when needed
+npx checkly skills
 ```
 
 ## What is Monitoring as Code?
@@ -333,6 +336,19 @@ my-monitoring-project/
 └── node_modules/
     └── checkly/               # CLI package with constructs
 ```
+
+## Checkly bundled agent references
+
+Checkly CLI 8.11 deprecates `npx checkly rules`; use `npx checkly skills` instead when you need Checkly's bundled AI-agent documentation, actions, or reference snippets:
+
+```bash
+npx checkly skills
+npx checkly skills configure
+npx checkly skills configure api-checks
+npx checkly skills install
+```
+
+This repository is an external multi-skill package for agent clients. Do not rely on the deprecated `checkly rules` command when refreshing or installing these skills.
 
 ## Installation methods
 

@@ -1,8 +1,15 @@
-1.0.6
+1.0.7
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.11.0
+  - Reviewed upstream release `8.11.0` and `npx -y checkly@8.11.0` help output on 2026-07-03.
+  - Updated auth guidance for env-var credentials: `whoami` now explains when the account comes from `CHECKLY_API_KEY`/`CHECKLY_ACCOUNT_ID`, and `logout` warns that env-var credentials still authenticate until removed.
+  - Added `npx checkly switch --account-id <id>` account-switching guidance instead of manual config deletion.
+  - Added destructive-project cleanup guidance for `npx checkly destroy`, including async progress, idempotent missing-project handling, `--preserve-resources`, and `--cancel-in-progress-deployment`.
+  - Noted that the upstream `checkly rules` command is deprecated in favor of `npx checkly skills` for Checkly's bundled agent references; this external skill pack should not use `checkly rules`.
+
 - checkly-cli v8.10.0
   - Reviewed upstream release `8.10.0` and `npx -y checkly@8.10.0` help output on 2026-06-25.
   - Added `npx checkly deploy --cancel-in-progress-deployment` guidance for asynchronous deployments with live progress and in-flight deployment replacement.

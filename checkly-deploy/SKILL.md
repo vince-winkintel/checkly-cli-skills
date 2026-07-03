@@ -18,6 +18,9 @@ npx checkly deploy --force
 
 # Preview changes without deploying
 npx checkly validate
+
+# Destroy the deployed project resources when intentionally decommissioning
+npx checkly destroy --force
 ```
 
 ## How deployment works
@@ -46,6 +49,19 @@ npx checkly deploy [options]
 | `--cancel-in-progress-deployment` | If a deployment for this project is already in progress, cancel it instead of waiting for it to finish |
 | `--config=<path>` | Path to checkly.config.ts |
 | `--verify-runtime-dependencies` | Validate npm package compatibility |
+
+### Destroy options
+
+```bash
+npx checkly destroy [options]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--force, -f` | Skip confirmation prompt |
+| `--config=<path>` | Path to checkly.config.ts/js |
+| `--preserve-resources` | Remove the project link but keep project resources as normal account-level resources |
+| `--cancel-in-progress-deployment` | If a deploy or destroy operation is already in progress, cancel it instead of waiting before retrying |
 
 ## Deployment workflows
 
@@ -96,6 +112,23 @@ npx checkly deploy --force --cancel-in-progress-deployment
 ```
 
 In CI, prefer serializing deploy jobs per environment. Add `--cancel-in-progress-deployment` only for workflows where a newer commit should supersede an older still-running deploy.
+
+### Destroying/decommissioning a project
+
+`npx checkly destroy` is destructive. Use it only when intentionally removing a Checkly CLI project from the account, and prefer a reviewed PR or explicit operator confirmation before running it.
+
+```bash
+# Preview project state first
+npx checkly validate
+
+# Destroy project-managed resources, skipping the prompt only in approved automation
+npx checkly destroy --force
+
+# Detach the project but keep checks/groups/dashboards as account-level resources
+npx checkly destroy --force --preserve-resources
+```
+
+Checkly CLI 8.11+ uses the async backend destroy endpoint: large-project deletion streams progress instead of timing out at the initial HTTP request, waits/retries when another deploy/delete is already in progress, and treats an already-missing project as successfully deleted. Use `--cancel-in-progress-deployment` only when the new destroy should supersede the current in-flight operation.
 
 ### Preview changes
 
@@ -316,9 +349,11 @@ npx checkly deploy
 - Delete unused checks in UI
 - Contact Checkly support
 
-### Deploy hangs or times out
+### Deploy or destroy hangs, conflicts, or times out
 
-**Solution**:
+Checkly CLI 8.11+ follows async deploy/destroy progress and can wait for an in-flight operation. If it appears stuck, first confirm whether another deploy/delete is already running for the same project. Use `--cancel-in-progress-deployment` only when you intentionally want the current command to replace that in-flight operation.
+
+**Solution:**
 ```bash
 # Check network connectivity
 curl https://api.checklyhq.com/health
