@@ -16,6 +16,12 @@ npx checkly login
 # Check authentication status
 npx checkly whoami
 
+# Switch to a known account in multi-account setups
+npx checkly switch --account-id <account-id>
+
+# Log out of saved local-session credentials
+npx checkly logout
+
 # Manual configuration (for CI/CD)
 export CHECKLY_API_KEY="your-api-key"
 export CHECKLY_ACCOUNT_ID="your-account-id"
@@ -50,6 +56,8 @@ npx checkly whoami
 2. Navigate to Account Settings → API Keys
 3. Create new API key with appropriate permissions
 4. Copy Account ID from URL or account settings
+
+Environment variables take precedence over saved `npx checkly login` credentials. In Checkly CLI 8.11+, `npx checkly whoami` tells you when the active account is resolved from `CHECKLY_API_KEY` / `CHECKLY_ACCOUNT_ID`, and `npx checkly logout` warns if those env vars still keep you authenticated after local session cleanup.
 
 ### Configuration file (manual)
 
@@ -97,21 +105,28 @@ Create/edit config file at `~/.config/@checkly/cli/config.json`:
 
 If you have multiple Checkly accounts:
 
-1. **Logout from current account**:
-   ```bash
-   # Manual logout (delete config)
-   rm ~/.config/@checkly/cli/config.json
-   ```
-
-2. **Login to different account**:
-   ```bash
-   npx checkly login
-   ```
-
-3. **Verify new account**:
+1. **List or verify the current account**:
    ```bash
    npx checkly whoami
    ```
+
+2. **Switch directly when you know the target account ID**:
+   ```bash
+   npx checkly switch --account-id <account-id>
+   ```
+
+3. **If you need a fresh browser login, clear saved local-session credentials first**:
+   ```bash
+   npx checkly logout --force
+   npx checkly login
+   ```
+
+4. **Verify the selected account**:
+   ```bash
+   npx checkly whoami
+   ```
+
+If `CHECKLY_API_KEY` or `CHECKLY_ACCOUNT_ID` are set in the shell or a project `.env`, they override the saved account. Remove or update those variables before using `login` / `switch` to change the effective account.
 
 ### CI/CD authentication
 
@@ -158,6 +173,20 @@ npx checkly login
 # Option 2: Set environment variables
 export CHECKLY_API_KEY="your-key"
 export CHECKLY_ACCOUNT_ID="your-account-id"
+```
+
+### `whoami` still shows an account after logout
+
+**Cause**: `CHECKLY_API_KEY` or `CHECKLY_ACCOUNT_ID` are still set in the shell or loaded from a project `.env`. `npx checkly logout` can clear saved local-session credentials but cannot remove environment variables.
+
+**Solution**:
+```bash
+# Inspect environment-backed credentials without printing secret values
+env | grep '^CHECKLY_.*=' | sed 's/=.*$/=<set>/'
+
+# Unset for the current shell if you want to use browser login credentials instead
+unset CHECKLY_API_KEY CHECKLY_ACCOUNT_ID
+npx checkly whoami
 ```
 
 ### "401 Unauthorized"
