@@ -16,8 +16,12 @@ npx checkly deploy
 # Force deploy (skip prompt)
 npx checkly deploy --force
 
+# Keep removed code resources in Checkly instead of deleting run history
+npx checkly deploy --preserve-resources
+
 # Preview changes without deploying
 npx checkly validate
+npx checkly deploy --preview
 
 # Destroy the deployed project resources when intentionally decommissioning
 npx checkly destroy --force
@@ -45,6 +49,7 @@ npx checkly deploy [options]
 | Flag | Description |
 |------|-------------|
 | `--force, -f` | Skip confirmation prompt |
+| `--preserve-resources` | Detach resources removed from code, keeping them and their run history in Checkly for UI management instead of deleting them |
 | `--verbose, -v` | Show created/updated resource names and IDs during deploy output |
 | `--cancel-in-progress-deployment` | If a deployment for this project is already in progress, cancel it instead of waiting for it to finish |
 | `--config=<path>` | Path to checkly.config.ts |
@@ -91,6 +96,22 @@ npx checkly deploy --force
 # No confirmation prompt
 # Useful for automated pipelines
 ```
+
+`--force` skips confirmation prompts, including the destructive-delete guard. In CI, use it only when the pipeline already reviewed the deployment diff or intentionally accepts destructive changes.
+
+### Preserve removed resources
+
+Checkly CLI 8.14.1 adds `--preserve-resources` for safer cleanup. When a resource is removed from code, a normal deploy deletes it from Checkly and loses run history. With `--preserve-resources`, the resource is detached from the project instead: it remains in the Checkly account, keeps its run history, and becomes UI-managed.
+
+```bash
+# Prefer this when removing checks/groups/dashboards from code but preserving history
+npx checkly deploy --preserve-resources
+
+# CI-safe deploy that detaches removed resources instead of deleting them
+npx checkly deploy --force --preserve-resources
+```
+
+Without `--preserve-resources`, interactive non-forced deploys now do an extra dry-run when deletions are possible and require explicit confirmation before permanently deleting removed resources. Forced deploys skip that second prompt.
 
 ### Verbose deployment output
 
@@ -173,7 +194,7 @@ jobs:
         env:
           CHECKLY_API_KEY: ${{ secrets.CHECKLY_API_KEY }}
           CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
-        run: npx checkly deploy --force
+        run: npx checkly deploy --force --preserve-resources
 ```
 
 ### GitLab CI
@@ -310,6 +331,9 @@ Changes to be deployed:
 
 - Delete checks:
   (none)
+
+Detached (kept in account, now UI-managed):
+  • legacy-status-page (StatusPage)
 
 + Create groups:
   • critical-checks

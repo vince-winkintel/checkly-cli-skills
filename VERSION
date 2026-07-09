@@ -3,6 +3,11 @@
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.14.1
+  - Reviewed upstream release `8.14.1`, PR checkly/checkly-cli#1390, and `npx --yes checkly@8.14.1 deploy --help` on 2026-07-09.
+  - Added `npx checkly deploy --preserve-resources` guidance for detaching resources removed from code while keeping run history and UI management.
+  - Documented the new destructive-delete guard for interactive non-forced deploys; `--force` skips the extra confirmation, so CI examples should use `--preserve-resources` when preserving removed-resource history is desired.
+  - Added preview output guidance for the `Detached (kept in account, now UI-managed)` deploy-diff bucket.
 - checkly-cli v8.11.0
   - Reviewed upstream release `8.11.0` and `npx -y checkly@8.11.0` help output on 2026-07-03.
   - Updated auth guidance for env-var credentials: `whoami` now explains when the account comes from `CHECKLY_API_KEY`/`CHECKLY_ACCOUNT_ID`, and `logout` warns that env-var credentials still authenticate until removed.
