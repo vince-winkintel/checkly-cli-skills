@@ -63,6 +63,19 @@ playwrightChecks: [
 ]
 ```
 
+## Private package registries
+
+For Playwright Check Suites, Checkly automatically bundles `.npmrc` from the workspace root and each workspace-member package root. Do not add those files manually to an `include` pattern. A `.npmrc` below a package root is not bundled because package managers do not read configuration from below the install directory.
+
+Because the bundled file is uploaded for the cloud install, reference credentials through an environment variable rather than storing a token in plaintext:
+
+```ini
+@company:registry=https://registry.example.com/
+//registry.example.com/:_authToken=${NPM_TOKEN}
+```
+
+Provide `NPM_TOKEN` through Checkly's locked environment variables or CI secrets. Changing a bundled `.npmrc` invalidates Checkly's workspace bundle cache.
+
 ## Related Skills
 
 - See `checkly-checks` for individual browser checks

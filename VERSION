@@ -1,8 +1,14 @@
-1.0.7
+1.0.8
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.15.0
+  - Reviewed upstream release `8.15.0`, compare `8.14.1...8.15.0`, official bundled AI references, construct source/tests, and `checkly@8.15.0` version/help output on 2026-07-14.
+  - Added gRPC, SSL, and traceroute monitor construct guidance with typed assertion builders, request shapes, response-time thresholds, and plan-gated property caveats.
+  - Added deployed-check, stats, terminal-reporter, and JSON-reporter guidance for type-specific gRPC/SSL/traceroute diagnostics, including the traceroute stats `Hops` column.
+  - Documented automatic `.npmrc` bundling for Playwright Check Suites; workspace-root and package-root `.npmrc` files no longer need a manual `include`, and credentials should be injected through environment variables.
+  - Moved the orchestrator skill into `checkly-cli-skills/SKILL.md` so Agent Skills discovery exposes all 14 skills instead of hiding the 13 sibling skills behind a root `SKILL.md`; verified selective `checkly-monitors` installation matches its source artifact.
 - checkly-cli v8.14.1
   - Reviewed upstream release `8.14.1`, PR checkly/checkly-cli#1390, and `npx --yes checkly@8.14.1 deploy --help` on 2026-07-09.
   - Added `npx checkly deploy --preserve-resources` guidance for detaching resources removed from code while keeping run history and UI management.

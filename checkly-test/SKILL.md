@@ -262,6 +262,8 @@ npx checkly test --reporter=json > results.json
 # Machine-readable output
 ```
 
+For failed gRPC, SSL, and traceroute monitors, terminal and JSON reporters include type-specific diagnostics when available. Inspect gRPC status/health/metadata, TLS certificate and handshake details, or traceroute hops/latency/packet loss before falling back to generic network troubleshooting.
+
 ## Testing strategies
 
 ### Local-first workflow

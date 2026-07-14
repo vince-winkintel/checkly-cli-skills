@@ -1,6 +1,6 @@
 ---
 name: checkly-cli-skills
-description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, check deployment, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, testing, deployment, imports, constructs, and advanced patterns. Triggers on checkly, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
+description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, gRPC/SSL/traceroute monitors, check deployment, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, monitors, testing, deployment, imports, constructs, and advanced patterns. Triggers on checkly, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
 metadata:
   {
     "openclaw":
@@ -84,7 +84,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 
 **Check Types:**
 - `checkly-checks` - API checks, browser checks, multi-step checks
-- `checkly-monitors` - Heartbeat, TCP, DNS, URL monitors
+- `checkly-monitors` - Heartbeat, TCP, DNS, URL, gRPC, SSL, and traceroute monitors
 - `checkly-groups` - Check groups for organization and shared config
 
 **Advanced:**
@@ -248,7 +248,10 @@ What are you monitoring?
    ├─ Periodic heartbeat → Heartbeat Monitor
    ├─ TCP port → TCP Monitor
    ├─ DNS record → DNS Monitor
-   └─ Simple HTTP → URL Monitor
+   ├─ Simple HTTP → URL Monitor
+   ├─ gRPC method / health service → gRPC Monitor
+   ├─ Certificate / TLS posture → SSL Monitor
+   └─ Network path / packet loss → Traceroute Monitor
 ```
 
 **Quick reference:**
@@ -339,7 +342,7 @@ my-monitoring-project/
 
 ## Checkly bundled agent references
 
-Checkly CLI 8.11 deprecates `npx checkly rules`; use `npx checkly skills` instead when you need Checkly's bundled AI-agent documentation, actions, or reference snippets:
+`npx checkly rules` is deprecated; use `npx checkly skills` instead when you need Checkly's bundled AI-agent documentation, actions, or reference snippets:
 
 ```bash
 npx checkly skills
