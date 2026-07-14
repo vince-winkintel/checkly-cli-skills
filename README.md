@@ -26,7 +26,7 @@ npx skills add vince-winkintel/checkly-cli-skills
 
 ### Check Types
 - **[checkly-checks](./checkly-checks)** - API checks, browser checks, multi-step checks
-- **[checkly-monitors](./checkly-monitors)** - Heartbeat, TCP, DNS, URL monitors
+- **[checkly-monitors](./checkly-monitors)** - Heartbeat, TCP, DNS, URL, gRPC, SSL, and traceroute monitors
 - **[checkly-groups](./checkly-groups)** - Check groups and organization
 
 ### Advanced Topics
@@ -45,6 +45,9 @@ Example prompts for AI agents:
 - "Deploy checks to Checkly cloud"
 - "Import existing checks from Checkly UI"
 - "Configure retry strategy for failed checks"
+- "Create a gRPC health monitor with status and latency assertions"
+- "Monitor TLS certificate expiry and TLS version"
+- "Trace a network path and alert on hop count or packet loss"
 - "Audit Checkly account members and pending invites"
 - "Inspect a recorded Checkly test session failure"
 - "Investigate why a Checkly alert did or did not fire"

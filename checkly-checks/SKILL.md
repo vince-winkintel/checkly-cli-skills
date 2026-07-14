@@ -523,7 +523,14 @@ npx checkly checks stats
 npx checkly checks stats --range last7Days --tag production
 npx checkly checks stats <check-id-1> <check-id-2>
 npx checkly checks stats --output json
+npx checkly checks stats --type GRPC
+npx checkly checks stats --type SSL
+npx checkly checks stats --type TRACEROUTE
 ```
+
+Stats support `GRPC`, `SSL`, and `TRACEROUTE` type filters. Traceroute table output includes a `Hops` column in addition to response-time metrics; use `--output json` for stable machine-readable analytics.
+
+For `checks get --result` and test output, gRPC, SSL, and traceroute failures include type-specific diagnostics when the runner returns them. Look for gRPC status/health/metadata, TLS certificate and handshake fields, or traceroute hops/latency/packet-loss data before treating the failure as a generic connection error.
 
 ## Troubleshooting
 
