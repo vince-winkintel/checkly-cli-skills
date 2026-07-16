@@ -1,8 +1,13 @@
-1.0.8
+1.0.9
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.16.0
+  - Reviewed upstream release `8.16.0`, compare `8.15.0...8.16.0`, bundled agent references, package source, and live `checkly@8.16.0` help output on 2026-07-16.
+  - Rebuilt `checkly-import` around the complete plan/apply/commit/cancel lifecycle, including `--plan-id`, `--no-commit`, non-interactive plan selection, `--dry-run`, and the pinned-target confirmation protocol.
+  - Added current agent-mode confirmation guidance for deploy, destroy, import commit, and import cancel; documented that returned `confirmCommand` flags are deliberate and must be run verbatim only after approval.
+  - Clarified protocol-dependent traceroute default ports and SSL result baseline output, including observed rule values and corrected pass/warn/fail rendering.
 - checkly-cli v8.15.0
   - Reviewed upstream release `8.15.0`, compare `8.14.1...8.15.0`, official bundled AI references, construct source/tests, and `checkly@8.15.0` version/help output on 2026-07-14.
   - Added gRPC, SSL, and traceroute monitor construct guidance with typed assertion builders, request shapes, response-time thresholds, and plan-gated property caveats.

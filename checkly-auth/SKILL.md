@@ -57,7 +57,7 @@ npx checkly whoami
 3. Create new API key with appropriate permissions
 4. Copy Account ID from URL or account settings
 
-Environment variables take precedence over saved `npx checkly login` credentials. In Checkly CLI 8.11+, `npx checkly whoami` tells you when the active account is resolved from `CHECKLY_API_KEY` / `CHECKLY_ACCOUNT_ID`, and `npx checkly logout` warns if those env vars still keep you authenticated after local session cleanup.
+Environment variables take precedence over saved `npx checkly login` credentials. `npx checkly whoami` tells you when the active account is resolved from `CHECKLY_API_KEY` / `CHECKLY_ACCOUNT_ID`, and `npx checkly logout` warns if those env vars still keep you authenticated after local session cleanup.
 
 ### Configuration file (manual)
 

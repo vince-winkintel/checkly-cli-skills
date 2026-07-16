@@ -198,7 +198,7 @@ new TracerouteMonitor('network-path', {
 })
 ```
 
-- `protocol` accepts `TCP` (default), `UDP`, `ICMP`, or `SCTP`; omit `port` for ICMP.
+- `protocol` accepts `TCP` (default), `UDP`, `ICMP`, or `SCTP`. If `port` is omitted, the backend defaults to 443 for TCP and 33434 for UDP/SCTP; omit `port` for ICMP.
 - `responseTime()` accepts `avg` (default), `min`, `max`, or `stdDev`.
 - `hopCount()` and `packetLoss()` do not take a property.
 

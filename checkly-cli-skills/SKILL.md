@@ -190,16 +190,27 @@ npx checkly deploy
 ### Import existing checks
 
 ```bash
-# Import all checks from Checkly account
+# Preview generated code without creating a plan
+npx checkly import --preview
+
+# Create the plan and generated code
 npx checkly import plan
 
 # Review generated code
 git diff
 
-# Commit imported checks
-git add .
-git commit -m "Import existing monitoring checks"
+# Apply one reviewed plan, but keep it pending during PR review
+npx checkly import apply --plan-id <plan-id> --no-commit
+
+# After the generated code is merged into the deployment branch, preview commit
+npx checkly import commit --plan-id <plan-id> --dry-run
 ```
+
+Do not deploy generated import code before applying its plan: that can create duplicate resources. Keep the applied plan pending until the generated code is durable, then commit it through the confirmation protocol in `checkly-import`.
+
+### Agent-mode confirmation protocol
+
+Write commands such as `deploy`, `destroy`, `import commit`, and `import cancel` return exit code 2 with `status: "confirmation_required"` in agent mode. Present the returned `changes` to the user, then run the returned `confirmCommand` verbatim only after explicit approval. Do not append `--force` yourself, remove flags that appear in the returned command, or assume parser-default flags are user intent.
 
 ### Inspect deployed check failures
 

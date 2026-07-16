@@ -99,9 +99,21 @@ npx checkly deploy --force
 
 `--force` skips confirmation prompts, including the destructive-delete guard. In CI, use it only when the pipeline already reviewed the deployment diff or intentionally accepts destructive changes.
 
+### Agent-mode confirmation
+
+In agent mode, running `npx checkly deploy` without `--force` returns exit code 2 and a JSON `confirmation_required` envelope before project parsing. Present its `changes` to the user and run the returned `confirmCommand` verbatim only after explicit approval.
+
+The confirmation envelope warns that deletion is possible but cannot list the exact resources yet. Preview first whenever resources may have been removed from code:
+
+```bash
+npx checkly deploy --preview --verbose
+```
+
+Review and present any deletions before requesting approval. The interactive itemized delete guard is skipped by `--force`, including the `--force` in an approved `confirmCommand`, so it is not a substitute for previewing. The generated command omits parser defaults and may include deliberate resolved-target flags; do not edit it or append `--force` yourself.
+
 ### Preserve removed resources
 
-Checkly CLI 8.14.1 adds `--preserve-resources` for safer cleanup. When a resource is removed from code, a normal deploy deletes it from Checkly and loses run history. With `--preserve-resources`, the resource is detached from the project instead: it remains in the Checkly account, keeps its run history, and becomes UI-managed.
+When a resource is removed from code, a normal deploy deletes it from Checkly and loses run history. With `--preserve-resources`, the resource is detached from the project instead: it remains in the Checkly account, keeps its run history, and becomes UI-managed.
 
 ```bash
 # Prefer this when removing checks/groups/dashboards from code but preserving history
@@ -126,7 +138,7 @@ npx checkly deploy --verbose
 
 ### Concurrent deployments
 
-Checkly CLI 8.10.0 deploys asynchronously with live progress. If another deployment for the same project is already running, the CLI normally waits for that deployment to finish. Use `--cancel-in-progress-deployment` only when you intentionally want the new deployment to replace the in-flight one:
+Deploy runs asynchronously with live progress. If another deployment for the same project is already running, the CLI normally waits for that deployment to finish. Use `--cancel-in-progress-deployment` only when you intentionally want the new deployment to replace the in-flight one:
 
 ```bash
 npx checkly deploy --force --cancel-in-progress-deployment
@@ -149,7 +161,7 @@ npx checkly destroy --force
 npx checkly destroy --force --preserve-resources
 ```
 
-Checkly CLI 8.11+ uses the async backend destroy endpoint: large-project deletion streams progress instead of timing out at the initial HTTP request, waits/retries when another deploy/delete is already in progress, and treats an already-missing project as successfully deleted. Use `--cancel-in-progress-deployment` only when the new destroy should supersede the current in-flight operation.
+Destroy uses the async backend endpoint: large-project deletion streams progress instead of timing out at the initial HTTP request, waits/retries when another deploy/delete is already in progress, and treats an already-missing project as successfully deleted. Use `--cancel-in-progress-deployment` only when the new destroy should supersede the current in-flight operation.
 
 ### Preview changes
 
@@ -375,7 +387,7 @@ npx checkly deploy
 
 ### Deploy or destroy hangs, conflicts, or times out
 
-Checkly CLI 8.11+ follows async deploy/destroy progress and can wait for an in-flight operation. If it appears stuck, first confirm whether another deploy/delete is already running for the same project. Use `--cancel-in-progress-deployment` only when you intentionally want the current command to replace that in-flight operation.
+The CLI follows async deploy/destroy progress and can wait for an in-flight operation. If it appears stuck, first confirm whether another deploy/delete is already running for the same project. Use `--cancel-in-progress-deployment` only when you intentionally want the current command to replace that in-flight operation.
 
 **Solution:**
 ```bash
