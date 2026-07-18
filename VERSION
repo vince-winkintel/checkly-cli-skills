@@ -1,8 +1,13 @@
-1.0.9
+1.0.10
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.17.1
+  - Reviewed upstream release `8.17.1`, compare `v8.16.0...8.17.1`, construct source/tests, and live `checkly@8.17.1` version/help output on 2026-07-18.
+  - Replaced obsolete source-specific SSL assertion builders with the new property-scoped `certificate()` and `connection()` grammar, including the expanded property/operator surface and response assertions.
+  - Documented gRPC health-status label-to-number handling and the removal of `storeResponseBody` from `GrpcRequest`.
+  - Confirmed that the top-level command surface is unchanged; detached non-TTY CI output deduplication is an internal reporter fix.
 - checkly-cli v8.16.0
   - Reviewed upstream release `8.16.0`, compare `8.15.0...8.16.0`, bundled agent references, package source, and live `checkly@8.16.0` help output on 2026-07-16.
   - Rebuilt `checkly-import` around the complete plan/apply/commit/cancel lifecycle, including `--plan-id`, `--no-commit`, non-interactive plan selection, `--dry-run`, and the pinned-target confirmation protocol.
