@@ -110,15 +110,14 @@ new GrpcMonitor('grpc-health', {
     url: 'grpc.example.com',
     port: 50051,
     grpcConfig: {
-      mode: 'BEHAVIOR',
+      mode: 'HEALTH',
       tls: true,
-      serviceDefinition: 'REFLECTION',
-      method: '/grpc.health.v1.Health/Check',
+      service: 'my.package.Service',
     },
     assertions: [
       GrpcAssertionBuilder.statusCode().equals(0),
+      GrpcAssertionBuilder.healthCheckStatus().equals('SERVING'),
       GrpcAssertionBuilder.responseTime().lessThan(5000),
-      GrpcAssertionBuilder.responseMessage('$.status').equals('SERVING'),
     ],
   },
 })
@@ -126,7 +125,9 @@ new GrpcMonitor('grpc-health', {
 
 - In `HEALTH` mode, optionally set `grpcConfig.service`; omit it to query overall server health.
 - In `BEHAVIOR` mode, set `grpcConfig.method` and use `serviceDefinition: 'REFLECTION'` or `'PROTO_FILE'`.
-- Use `GrpcAssertionBuilder` for status, health status, response message/body, response metadata, and response-time assertions.
+- `healthCheckStatus().equals()` and `.notEquals()` accept `UNKNOWN`, `SERVING`, `NOT_SERVING`, or `SERVICE_UNKNOWN` (or raw enum values `0`-`3`). Use the builder: it emits the numeric wire target required by the runner.
+- In `BEHAVIOR` mode, use `responseMessage('$.path')`, `textBody()`, or `responseMetadata('header-name')` assertions as appropriate.
+- Do not add `storeResponseBody` to the request; it is no longer part of `GrpcRequest`.
 
 ## SSL monitors
 
@@ -153,11 +154,13 @@ new SslMonitor('tls-certificate', {
       skipChainValidation: false,
     },
     assertions: [
-      SslAssertionBuilder.certExpiresInDays().greaterThan(30),
-      SslAssertionBuilder.chainTrusted().equals(true),
-      SslAssertionBuilder.hostnameVerified().equals(true),
-      SslAssertionBuilder.tlsVersion().equals(TlsVersion.TLS1_3),
-      SslAssertionBuilder.cipherSuite().equals(CipherSuite.TLS_AES_256_GCM_SHA384),
+      SslAssertionBuilder.certificate('daysUntilExpiry').greaterThan(30),
+      SslAssertionBuilder.certificate('selfSigned').equals(false),
+      SslAssertionBuilder.connection('chainTrusted').equals(true),
+      SslAssertionBuilder.connection('hostnameVerified').equals(true),
+      SslAssertionBuilder.connection('tlsVersion').equals(TlsVersion.TLS1_3),
+      SslAssertionBuilder.connection('cipherSuite').equals(CipherSuite.TLS_AES_256_GCM_SHA384),
+      SslAssertionBuilder.responseTime().lessThan(1000),
     ],
   },
 })
@@ -166,6 +169,11 @@ new SslMonitor('tls-certificate', {
 - Response-time thresholds are top-level monitor properties and measure TLS handshake time.
 - Put certificate settings under `request.sslConfig`.
 - For mutual TLS, set `clientCertificateMode: 'explicit'` and `sslClientCertificateId` under `sslConfig`; never embed certificate secrets in a check file.
+- SSL assertions are property-scoped. Use `certificate('<property>')` for certificate facts and `connection('<property>')` for connection and handshake facts; the pre-8.17 source-specific builders such as `certExpiresInDays()` and `tlsVersion()` are obsolete.
+- Certificate properties include `daysUntilExpiry`, `keySizeBits`, `subjectCN`, `issuerCN`, `serialNumber`, `fingerprintSha256`, `issuerFingerprintSha256`, `keyAlgorithm`, `signatureAlgorithm`, `sans`, `selfSigned`, and `isCA`.
+- Connection properties include `tlsVersion`, `cipherSuite`, `hostnameVerified`, `chainTrusted`, `ocspStapled`, `ocspStatus`, and `resolvedIp`.
+- The supported operator depends on the property. Numeric properties support equality and greater/less-than comparisons; booleans support `equals`; strings generally support equality and, where applicable, `contains`/`notContains`.
+- Use `responseTime()` for TLS response time, `jsonResponse('$.path')` for structured result fields, and `textResponse()` (optionally with an extraction regex) for serialized result text.
 - Use the exported `TlsVersion`, `CipherSuite`, and `SignatureAlgorithm` constants to avoid invalid assertion values.
 
 ## Traceroute monitors
