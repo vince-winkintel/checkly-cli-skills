@@ -95,7 +95,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 **Operations:**
 - `checkly-members` - Audit and manage Checkly account access with `npx checkly members`
 - `checkly-test` - Also covers `npx checkly test-sessions` for recorded test-session drilldown and RCA context
-- `checkly-checks` - Inspect and delete deployed checks with `npx checkly checks`; use `checks delete --dry-run` before destructive deletes
+- `checkly-checks` - Inspect, run, and delete deployed checks with `npx checkly checks`; confirm live-run targets before `checks run`, and use `checks delete --dry-run` before destructive deletes
 - `checkly-assets` - List/download result assets such as logs, traces, videos, screenshots, pcap, reports, and files for failure investigation
 
 ## When to use Checkly CLI vs Web UI
@@ -228,6 +228,8 @@ npx checkly checks get <check-id> --result <result-id>
 ```
 
 When investigating a deployed failure, look for `errorGroups`, `rootCause`, or `RCA` fields in the output. If Checkly already surfaced Rocky AI root-cause analysis, reuse that context before suggesting additional debugging steps.
+
+To trigger deployed checks rather than test local project definitions, route to `checkly-checks` for `npx checkly checks run`. This creates live check sessions using deployed locations and alerting rules, so confirm the intended check IDs or tags before running it; omitting selectors targets all deployed checks.
 
 For alerting questions, use read-only JSON/API evidence before table output:
 

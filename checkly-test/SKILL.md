@@ -38,6 +38,8 @@ npx checkly test-sessions get <session-id> --error-group <error-group-id> --full
 - ✅ Local development iteration
 - ✅ Debugging check failures
 
+The CLI dispatches test sessions through Checkly's asynchronous scheduling API and watches scheduling before collecting results. Scheduling failures now fail fast with the server error instead of waiting for the per-check timeout. With `--detach`, the CLI confirms scheduling reached a terminal state before exiting, so dispatch failures still return non-zero.
+
 ## Command reference
 
 ```bash

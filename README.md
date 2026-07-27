@@ -150,6 +150,16 @@ When Checkly exposes `errorGroups`, `rootCause`, or `RCA` in `checks get` output
 
 For alerting investigations, prefer read-only JSON/API evidence over table output. Inspect the selected check, any matching group, and referenced alert-channel subscriptions; do not guess account/global alerting endpoints if the CLI/API output does not expose those fields. Report global alert settings as selected-but-unavailable when `useGlobalAlertSettings: true` is the only evidence.
 
+## Running deployed checks
+
+```bash
+# Trigger selected deployed checks using their configured locations and alerts
+npx checkly checks run --check-id <check-id>
+npx checkly checks run --tags production,api --output json
+```
+
+Unlike `checkly test`, `checks run` creates live sessions for deployed checks and can trigger configured alerts. Confirm selectors before running it; no selector targets all deployed checks. See `checkly-checks` for tag matching, detach, timeout, cache, output, and exit-status behavior.
+
 ## Documentation
 
 - [Checkly CLI Documentation](https://www.checklyhq.com/docs/cli/)
