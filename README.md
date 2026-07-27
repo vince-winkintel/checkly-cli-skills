@@ -158,7 +158,7 @@ npx checkly checks run --check-id <check-id>
 npx checkly checks run --tags production,api --output json
 ```
 
-Unlike `checkly test`, `checks run` creates live sessions for deployed checks and can trigger configured alerts. Confirm selectors before running it; no selector targets all deployed checks. See `checkly-checks` for tag matching, detach, timeout, cache, output, and exit-status behavior.
+Unlike `checkly test`, `checks run` creates live sessions for deployed checks and can trigger configured alerts. It has no dry-run or confirmation prompt, always requires an explicitly confirmed `--check-id` or `--tags` selector, and running without one targets every activated deployed check. See `checkly-checks` for tag matching, detach, timeout, cache, output, and exit-status behavior.
 
 ## Documentation
 
