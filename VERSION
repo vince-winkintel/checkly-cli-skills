@@ -1,8 +1,13 @@
-1.0.10
+1.0.11
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.18.0
+  - Reviewed upstream release `8.18.0`, compare `8.17.1...8.18.0`, command/construct source, and live `checkly@8.18.0` version/help output on 2026-07-27.
+  - Added the new `checks run` workflow for triggering deployed checks by ID or tag, including selector semantics, output/detach/cache/timeout behavior, exit-status handling, and live-run safety guidance.
+  - Documented Telegram forum-topic alert delivery through `TelegramAlertChannel.messageThreadId` without hardcoding bot credentials.
+  - Noted that `checkly test` now dispatches through the async scheduling API, fails fast on scheduling errors, and confirms scheduling completes before `--detach` exits.
 - checkly-cli v8.17.1
   - Reviewed upstream release `8.17.1`, compare `v8.16.0...8.17.1`, construct source/tests, and live `checkly@8.17.1` version/help output on 2026-07-18.
   - Replaced obsolete source-specific SSL assertion builders with the new property-scoped `certificate()` and `connection()` grammar, including the expanded property/operator surface and response assertions.

@@ -336,7 +336,11 @@ new ApiCheck('tagged-check', {
 ### Alert configuration
 
 ```typescript
-import { EmailAlertChannel, SlackAppAlertChannel } from 'checkly/constructs'
+import {
+  EmailAlertChannel,
+  SlackAppAlertChannel,
+  TelegramAlertChannel,
+} from 'checkly/constructs'
 
 const emailChannel = new EmailAlertChannel('email-alerts', {
   address: 'team@example.com',
@@ -349,9 +353,26 @@ const slackAppChannel = new SlackAppAlertChannel('slack-app-alerts', {
   slackChannels: ['#alerts'],
 })
 
+// Keep bot credentials in the environment. messageThreadId routes alerts to
+// one forum topic inside a Telegram group; omit it for the main chat.
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`)
+  }
+  return value
+}
+
+const telegramChannel = new TelegramAlertChannel('telegram-alerts', {
+  name: 'Telegram topic alerts',
+  chatId: requireEnv('CHECKLY_TELEGRAM_CHAT_ID'),
+  apiKey: requireEnv('CHECKLY_TELEGRAM_BOT_TOKEN'),
+  messageThreadId: process.env.CHECKLY_TELEGRAM_TOPIC_ID,
+})
+
 new ApiCheck('check-with-alerts', {
   name: 'Check with Alerts',
-  alertChannels: [emailChannel, slackAppChannel],
+  alertChannels: [emailChannel, slackAppChannel, telegramChannel],
 })
 ```
 
@@ -442,6 +463,38 @@ new ApiCheck('api-check', {
   },
 })
 ```
+
+## Run deployed checks now
+
+`checks run` starts live check sessions immediately for already deployed checks, using their configured locations and alerting rules. It is not the same as `checkly test`, which evaluates project definitions. It has no `--dry-run`, no `--force`, and no confirmation prompt. A live run consumes account usage and may alert real on-call recipients. Require explicit user approval before running it.
+
+Never run `checks run` without a `--check-id` or `--tags` selector because no selector targets every activated deployed check in the account. Use one selector type at a time; combining `--check-id` and `--tags` has unverified server-side selection semantics.
+
+```bash
+# Preview tag matches before running. checks list uses singular --tag,
+# while checks run uses plural --tags.
+npx checkly checks list --tag production --output json
+
+# Run one or more deployed checks by ID
+npx checkly checks run --check-id <check-id>
+npx checkly checks run --check-id <check-id-1>,<check-id-2> --output json
+
+# Match all tags in one filter; repeat --tags to OR multiple filters
+npx checkly checks run --tags production,api
+npx checkly checks run --tags production,api --tags staging,browser
+
+# Start the selected sessions and exit without waiting for results
+npx checkly checks run --check-id <check-id> --detach
+```
+
+Useful controls:
+
+- `--refresh-cache` refreshes the selected-check cache before the run.
+- `--timeout <seconds>` controls how long the CLI waits for sessions (default `600`); a timeout does not cancel sessions still running in Checkly.
+- `--output table|json|md` selects the result format.
+- A completed failed, timed-out, or cancelled session produces a non-zero exit status. A `DEGRADED` session exits `0`, so green CI does not prove every check was fully healthy.
+- No matches fail by default. Use `--no-fail-on-no-matching` only when an empty selection is intentionally acceptable.
+- `--detach` exits after the sessions start instead of polling for their results; trigger-request failures still return non-zero.
 
 ## Inspect deployed checks
 
