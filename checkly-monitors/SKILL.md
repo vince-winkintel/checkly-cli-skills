@@ -210,6 +210,23 @@ new TracerouteMonitor('network-path', {
 - `responseTime()` accepts `avg` (default), `min`, `max`, or `stdDev`.
 - `hopCount()` and `packetLoss()` do not take a property.
 
+## Response-time validation
+
+`degradedResponseTime` and `maxResponseTime` are top-level monitor properties. They control degraded/failing check states and are separate from response-time assertions inside `request.assertions`.
+
+The CLI applies these standard client-side ceilings when the authenticated account does not advertise extended response-time limits:
+
+| Monitor | Standard ceiling |
+|---------|------------------|
+| TCP | 5 seconds |
+| DNS | 5 seconds |
+| URL | 30 seconds |
+| gRPC | 180 seconds |
+| SSL | 30 seconds |
+| Traceroute | 30 seconds |
+
+For accounts with extended limits, the CLI skips the fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume the entitlement is present: validate with `npx checkly test` against the target account. Older or self-hosted APIs that do not expose account feature flags keep the standard ceilings. In every case, `degradedResponseTime` must be less than or equal to `maxResponseTime`.
+
 ## Validate and deploy
 
 ```bash

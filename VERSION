@@ -1,8 +1,12 @@
-1.0.11
+1.0.12
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.19.0
+  - Reviewed upstream release `8.19.0`, compare `8.18.0...8.19.0`, PR `checkly/checkly-cli#1425`, construct source/tests, and live `checkly@8.19.0` version/help output on 2026-08-01.
+  - Documented account-aware response-time validation: standard client-side ceilings remain in force unless the authenticated account advertises extended limits, in which case the CLI defers the upper bound to the API while preserving the degraded-versus-maximum consistency check.
+  - Added the standard response-time ceilings for API, TCP, DNS, URL, gRPC, SSL, and traceroute constructs and distinguished top-level monitor/check thresholds from request assertions.
 - checkly-cli v8.18.0
   - Reviewed upstream release `8.18.0`, compare `8.17.1...8.18.0`, command/construct source, and live `checkly@8.18.0` version/help output on 2026-07-27.
   - Added the new `checks run` workflow for triggering deployed checks by ID or tag, including selector semantics, output/detach/cache/timeout behavior, exit-status handling, and live-run safety guidance.
