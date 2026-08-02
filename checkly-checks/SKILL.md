@@ -324,6 +324,12 @@ new ApiCheck('scheduled-check', {
 })
 ```
 
+### Response-time validation
+
+`degradedResponseTime` and `maxResponseTime` are top-level `ApiCheck` properties. They control check-state thresholds and are separate from `AssertionBuilder.responseTime()` request assertions.
+
+The standard client-side ceiling for both API-check properties is 30 seconds. When the authenticated account advertises extended response-time limits, the CLI skips that fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume that entitlement is present: run `npx checkly test` with the target account and treat its validation or API response as authoritative. Older or self-hosted APIs that do not expose account feature flags keep the standard ceiling. In every case, `degradedResponseTime` must be less than or equal to `maxResponseTime`.
+
 ### Tags and organization
 
 ```typescript
