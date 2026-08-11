@@ -76,6 +76,24 @@ Because the bundled file is uploaded for the cloud install, reference credential
 
 Provide `NPM_TOKEN` through Checkly's locked environment variables or CI secrets. Changing a bundled `.npmrc` invalidates Checkly's workspace bundle cache.
 
+## Dependency cache invalidation
+
+Checkly keys installed dependencies from the lockfile, `package.json`, and `.npmrc`. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change the top-level cache version in `checkly.config.ts`:
+
+```typescript
+export default defineConfig({
+  projectName: 'My monitoring project',
+  logicalId: 'my-monitoring-project',
+  caching: {
+    dependencyCache: {
+      version: '2', // string or safe integer; change to invalidate
+    },
+  },
+})
+```
+
+Do not place `caching` on an individual suite or check: one uploaded code bundle serves all Playwright Check Suites. Unset and empty-string versions leave the key unchanged. For a one-off reinstall during an ad-hoc run, use `--refresh-cache` on `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead.
+
 ## Related Skills
 
 - See `checkly-checks` for individual browser checks
