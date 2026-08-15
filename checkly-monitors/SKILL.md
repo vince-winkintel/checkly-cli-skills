@@ -1,6 +1,6 @@
 ---
 name: checkly-monitors
-description: Create health and infrastructure monitors including heartbeat, TCP, DNS, URL, gRPC, SSL, and traceroute monitors. Use for uptime monitoring, service availability, TLS certificate validation, gRPC health or behavior checks, network path diagnostics, DNS validation, and infrastructure health without browser code. Triggers on heartbeat, TCP monitor, DNS monitor, URL monitor, gRPC monitor, SSL monitor, certificate expiry, traceroute, health check, uptime monitoring.
+description: Create health and infrastructure monitors including heartbeat, TCP, DNS, ICMP, URL, gRPC, SSL, and traceroute monitors. Use for uptime monitoring, service availability, TLS certificate validation, gRPC health or behavior checks, network path diagnostics, DNS validation, and infrastructure health without browser code. Triggers on heartbeat, TCP monitor, DNS monitor, ICMP monitor, ping monitor, URL monitor, gRPC monitor, SSL monitor, certificate expiry, traceroute, health check, uptime monitoring.
 ---
 
 # checkly monitors
@@ -14,10 +14,39 @@ Health and infrastructure checks without browser code execution.
 | **Heartbeat** | Periodic ping expected | Inbound webhook calls |
 | **TCP** | Port connectivity | Socket connection |
 | **DNS** | Domain resolution | DNS records |
+| **ICMP** | Host reachability | ICMP echo |
 | **URL** | HTTP availability | Status code only |
 | **gRPC** | gRPC service health or unary behavior | Status, health, response, metadata, latency |
 | **SSL** | Certificate and TLS posture | Expiry, trust, hostname, protocol, cipher, key |
 | **Traceroute** | Network path diagnostics | Latency, hop count, packet loss |
+
+## Structured monitor intent
+
+`TcpMonitor`, `DnsMonitor`, `IcmpMonitor`, `UrlMonitor`, and `GrpcMonitor` accept structured `intent` for durable root-cause-analysis and check-repair guidance. `HeartbeatMonitor`, `SslMonitor`, and `TracerouteMonitor` do not expose it.
+
+```typescript
+new UrlMonitor('dashboard-url', {
+  name: 'Dashboard URL',
+  request: {
+    url: 'https://example.com/dashboard',
+  },
+  intent: {
+    goal: 'Verify that the dashboard remains publicly reachable.',
+    constraints: [
+      {
+        type: 'REQUIRED_OUTCOME',
+        statement: 'The dashboard returns a successful HTTP response.',
+      },
+      {
+        type: 'MUST_PRESERVE',
+        statement: 'Keep the production hostname in the monitored URL.',
+      },
+    ],
+  },
+})
+```
+
+Intent supplements executable monitor assertions; it does not replace them. Omit the property to preserve existing backend-authored intent, provide an object to set/update it, or use `intent: null` to clear it deliberately. `goal` is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
 
 ## Heartbeat monitors
 
@@ -90,8 +119,9 @@ import { UrlMonitor } from 'checkly/constructs'
 
 new UrlMonitor('url-check', {
   name: 'Homepage URL Check',
-  url: 'https://example.com',
-  method: 'GET',
+  request: {
+    url: 'https://example.com',
+  },
 })
 ```
 

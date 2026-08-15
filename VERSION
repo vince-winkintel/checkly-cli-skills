@@ -3,6 +3,11 @@
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.21.0
+  - Reviewed upstream release `8.21.0`, compare `8.20.0...8.21.0`, bundled Checkly skill guidance, construct source/tests, and live `checkly@8.21.0` version output on 2026-08-15.
+  - Added structured check-intent guidance for supported runtime checks and uptime monitors, including `REQUIRED_OUTCOME` / `MUST_PRESERVE` constraints, validation limits, omit-versus-null deployment semantics, and the explicit-construct requirement for Playwright intent.
+  - Corrected URL monitor examples to place `url` under the required `request` object.
+  - Added CLI-versus-MCP routing and account-parity guidance from Checkly's bundled skill. Transparent transient-API retries and result-asset cleanup fixes require no new command or flag workflow.
 - checkly-cli v8.20.0
   - Reviewed upstream release `8.20.0`, compare `8.19.0...8.20.0`, bundled AI references, and live `checkly@8.20.0` version/help output on 2026-08-11.
   - Added top-level `caching.dependencyCache.version` guidance for persistent Playwright Check Suite dependency-cache invalidation, while keeping `--refresh-cache` as the one-off run/test control.

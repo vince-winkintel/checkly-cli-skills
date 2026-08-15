@@ -29,6 +29,30 @@ export default defineConfig({
 })
 ```
 
+## Structured check intent
+
+`PlaywrightCheck` supports durable intent for Checkly root-cause analysis and check repair:
+
+```typescript
+import { PlaywrightCheck } from 'checkly/constructs'
+
+new PlaywrightCheck('critical-browser-journey', {
+  name: 'Critical Browser Journey',
+  playwrightConfigPath: './playwright.config.ts',
+  intent: {
+    goal: 'Verify that users can complete the critical browser journey.',
+    constraints: [
+      {
+        type: 'MUST_PRESERVE',
+        statement: 'Do not weaken the final success assertion.',
+      },
+    ],
+  },
+})
+```
+
+The shorthand `checks.playwrightChecks` entries do not expose `intent`; use an explicit `PlaywrightCheck` construct when intent is required. Intent does not replace Playwright assertions. Omit it to preserve existing backend-authored intent, provide an object to set/update it, or use `intent: null` to clear it deliberately. A goal is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
+
 ## Playwright configuration
 
 ```typescript

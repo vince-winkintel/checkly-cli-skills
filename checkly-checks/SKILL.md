@@ -16,6 +16,36 @@ Create API checks, browser checks, and multi-step checks.
 | **Multi-Step Check** | Complex browser workflows | Playwright (legacy) |
 | **Playwright Check Suite** | Full test suites | Playwright projects |
 
+## Structured check intent
+
+`ApiCheck`, `BrowserCheck`, `MultiStepCheck`, and `PlaywrightCheck` accept an `intent` property for durable root-cause-analysis and check-repair guidance:
+
+```typescript
+new ApiCheck('dashboard-api', {
+  name: 'Dashboard API',
+  intent: {
+    goal: 'Verify that authenticated users can open the dashboard.',
+    constraints: [
+      {
+        type: 'REQUIRED_OUTCOME',
+        statement: 'The dashboard displays the account overview.',
+      },
+      {
+        type: 'MUST_PRESERVE',
+        statement: 'Do not weaken the authentication assertion.',
+      },
+    ],
+  },
+  request: {
+    method: 'GET',
+    url: 'https://example.com/api/dashboard',
+    assertions: [AssertionBuilder.statusCode().equals(200)],
+  },
+})
+```
+
+Intent is separate from the check description and executable assertions. Omit `intent` to preserve existing backend-authored intent; use an object to set/update it; use `intent: null` only to clear it deliberately. The CLI trims values and rejects unknown fields. `goal` is required and limited to 2,000 characters. Constraint types are exact uppercase `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 characters per statement.
+
 ## API Checks
 
 Monitor HTTP endpoints with assertions.
