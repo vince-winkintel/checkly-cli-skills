@@ -56,6 +56,7 @@ npx checkly test [file-pattern] [options]
 | `--retries=<n>` | Retry failed checks (0-3) |
 | `--config=<path>` | Path to checkly.config.ts |
 | `--verify-runtime-dependencies` | Validate npm package versions |
+| `--refresh-cache` | Force a one-off dependency reinstall for this run |
 | `--env-file=<path>` | Load environment variables from file |
 | `--grep=<pattern>` | Filter checks by name pattern |
 
@@ -63,7 +64,7 @@ npx checkly test [file-pattern] [options]
 
 Use `test-sessions` drilldown commands for recorded sessions after `npx checkly test`, `npx checkly trigger`, CI runs, or Playwright Reporter uploads when you need failure details, result IDs, or error-group context for RCA.
 
-For cancelled or timed-out agentic runs started by `checkly test`, `checkly trigger`, or `checkly pw-test`, inspect the recorded session with the existing commands below; this cancellation handling is backend/runner wiring rather than a separate public `test-sessions` command or flag.
+For cancelled or timed-out runs started by `checkly test`, `checkly trigger`, or `checkly pw-test`, inspect the recorded session with the existing commands below; cancellation handling is backend/runner wiring rather than a separate public `test-sessions` command or flag.
 
 ```bash
 # List recent sessions

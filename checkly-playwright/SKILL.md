@@ -29,6 +29,30 @@ export default defineConfig({
 })
 ```
 
+## Structured check intent
+
+`PlaywrightCheck` supports durable intent for Checkly root-cause analysis and check repair:
+
+```typescript
+import { PlaywrightCheck } from 'checkly/constructs'
+
+new PlaywrightCheck('critical-browser-journey', {
+  name: 'Critical Browser Journey',
+  playwrightConfigPath: './playwright.config.ts',
+  intent: {
+    goal: 'Verify that users can complete the critical browser journey.',
+    constraints: [
+      {
+        type: 'MUST_PRESERVE',
+        statement: 'Do not weaken the final success assertion.',
+      },
+    ],
+  },
+})
+```
+
+The shorthand `checks.playwrightChecks` entries do not expose `intent`; use an explicit `PlaywrightCheck` construct when intent is required. Intent does not replace Playwright assertions. Omit it to preserve existing backend-authored intent, provide an object to set/update it, or use `intent: null` to clear it deliberately. A goal is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
+
 ## Playwright configuration
 
 ```typescript
@@ -75,6 +99,24 @@ Because the bundled file is uploaded for the cloud install, reference credential
 ```
 
 Provide `NPM_TOKEN` through Checkly's locked environment variables or CI secrets. Changing a bundled `.npmrc` invalidates Checkly's workspace bundle cache.
+
+## Dependency cache invalidation
+
+Checkly keys installed dependencies from the lockfile, `package.json`, and `.npmrc`. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change the top-level cache version in `checkly.config.ts`:
+
+```typescript
+export default defineConfig({
+  projectName: 'My monitoring project',
+  logicalId: 'my-monitoring-project',
+  caching: {
+    dependencyCache: {
+      version: '2', // string or safe integer; change to invalidate
+    },
+  },
+})
+```
+
+Do not place `caching` on an individual suite or check: one uploaded code bundle serves all Playwright Check Suites. Unset and empty-string versions leave the key unchanged. For a one-off reinstall during an ad-hoc run, use `--refresh-cache` on `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead.
 
 ## Related Skills
 

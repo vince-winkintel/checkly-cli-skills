@@ -41,6 +41,22 @@ metadata:
 
 Comprehensive Checkly CLI command reference and Monitoring as Code (MaC) workflows.
 
+## Choose CLI or MCP first
+
+This skill pack drives `npx checkly` in a shell. Use the CLI for authoring, testing, importing, and deploying Monitoring as Code. Checkly MCP covers only a subset of live-account work: check status/results, test sessions, root-cause analysis, triggering deployed checks, and incidents.
+
+Before the first command that talks to the Checkly API:
+
+1. With shell access, run `npx checkly whoami` once.
+   - If it succeeds, continue with the CLI, even when Checkly MCP tools are also connected.
+   - If authentication fails, do not work around it for authoring, testing, imports, or deploys; authenticate with `npx checkly login` or `CHECKLY_API_KEY` plus `CHECKLY_ACCOUNT_ID`.
+   - For supported live-account work only, an authenticated Checkly MCP connection may be used as a fallback. Call its `whoami` tool first and name the account being used.
+2. Without shell access, use connected Checkly MCP tools only for their supported live-account operations. The MCP server cannot replace the CLI for Monitoring as Code.
+
+Never mix CLI and MCP evidence without confirming that both sessions use the same account ID. A fallback write still requires the same explicit review/confirmation as the corresponding CLI action.
+
+Run `npx checkly skills` before choosing a live CLI action. It loads the current action list locally and does not require Checkly authentication.
+
 ## Quick start
 
 ```bash

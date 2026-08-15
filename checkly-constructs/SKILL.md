@@ -51,6 +51,43 @@ new ApiCheck('api-status-check', {  // <- logical ID
 4. **Synthesis**: Converted to API payload
 5. **Deployment**: Created/updated in Checkly
 
+## Structured check intent
+
+Use `intent` to give Checkly root-cause analysis and check-repair features durable guidance about what a check is meant to verify. Intent supplements descriptions and executable assertions; it does not replace either.
+
+```typescript
+new ApiCheck('dashboard-api', {
+  name: 'Dashboard API',
+  intent: {
+    goal: 'Verify that authenticated users can open the dashboard.',
+    constraints: [
+      {
+        type: 'REQUIRED_OUTCOME',
+        statement: 'The dashboard displays the account overview.',
+      },
+      {
+        type: 'MUST_PRESERVE',
+        statement: 'Do not weaken the authentication assertion.',
+      },
+    ],
+  },
+  request: {
+    method: 'GET',
+    url: 'https://example.com/api/dashboard',
+  },
+})
+```
+
+Intent is supported by `ApiCheck`, `BrowserCheck`, `MultiStepCheck`, `PlaywrightCheck`, `TcpMonitor`, `DnsMonitor`, `IcmpMonitor`, `UrlMonitor`, and `GrpcMonitor`. It is not exposed on `AgenticCheck`, `HeartbeatMonitor`, `SslMonitor`, or `TracerouteMonitor`.
+
+Deployment semantics are deliberate:
+
+- Omit `intent` to leave any existing backend-authored intent unchanged.
+- Provide an object to set or update intent.
+- Set `intent: null` to explicitly clear it.
+
+The CLI trims surrounding whitespace. `goal` is required and limited to 2,000 characters after trimming. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`; each statement is limited to 1,000 characters, and each type may appear at most 20 times. Unknown fields or constraint types fail validation.
+
 ## Session and Project
 
 The Session singleton manages global state:
