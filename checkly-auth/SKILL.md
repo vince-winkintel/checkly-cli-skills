@@ -234,7 +234,7 @@ npx checkly whoami
 |----------|----------|-------------|
 | `CHECKLY_API_KEY` | Yes | API key (starts with `cu_`) |
 | `CHECKLY_ACCOUNT_ID` | Yes | Numeric account ID |
-| `CHECKLY_API_URL` | No | Override API URL (default: `https://api.checklyhq.com`) |
+| `CHECKLY_API_URL` | No | Override the local API URL when `CHECKLY_ENV=local` (default: `http://127.0.0.1:3000`) |
 | `CHECKLY_MQTT_URL` | No | Override the local events/MQTT broker when `CHECKLY_ENV=local` |
 | `CHECKLY_SKIP_AUTH` | No | Skip authentication (for debugging flags) |
 
