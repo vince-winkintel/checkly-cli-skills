@@ -32,12 +32,19 @@ export default defineConfig({
       testMatch: '**/__checks__/**/*.spec.{js,ts}',
     },
   },
+  bundle: {
+    packages: {
+      embed: ['@acme/*', 'legacy-private-pkg@2.1.0'],
+    },
+  },
 })
 ```
 
+Use top-level `bundle.packages.embed` only for Playwright Check Suites whose private-registry dependencies cannot be fetched by Checkly runners. Entries resolve against the workspace-root `pnpm-lock.yaml` or `package-lock.json` and can be package names, exact `name@version` pins, or name wildcards such as `@acme/*`, `acme-*`, and `@acme/*-utils`; `*` does not cross `/`. The resolved embedded tarball set is part of the runner dependency-cache key. See `checkly-playwright` for package eligibility, cache, and secret-handling details.
+
 ### Dependency-cache invalidation
 
-Checkly caches installed dependencies for Playwright Check Suites using the lockfile, `package.json`, and `.npmrc` content. To invalidate that cache persistently for deployed and scheduled suites, set a top-level string or safe integer and change it when dependencies must be reinstalled:
+Checkly caches installed dependencies for Playwright Check Suites using the lockfile, `package.json`, `.npmrc` content, and the resolved embedded package set. To invalidate that cache persistently for deployed and scheduled suites, set a top-level string or safe integer and change it when dependencies must be reinstalled:
 
 ```typescript
 export default defineConfig({

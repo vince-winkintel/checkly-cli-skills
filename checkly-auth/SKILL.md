@@ -235,7 +235,10 @@ npx checkly whoami
 | `CHECKLY_API_KEY` | Yes | API key (starts with `cu_`) |
 | `CHECKLY_ACCOUNT_ID` | Yes | Numeric account ID |
 | `CHECKLY_API_URL` | No | Override API URL (default: `https://api.checklyhq.com`) |
+| `CHECKLY_MQTT_URL` | No | Override the local events/MQTT broker when `CHECKLY_ENV=local` |
 | `CHECKLY_SKIP_AUTH` | No | Skip authentication (for debugging flags) |
+
+`CHECKLY_MQTT_URL` is advanced troubleshooting configuration for local or custom setups where test-session event streams come from a different broker. It is analogous to `CHECKLY_API_URL` for local endpoint overrides, not a normal hosted Checkly credential or default CI setting.
 
 ## Security best practices
 

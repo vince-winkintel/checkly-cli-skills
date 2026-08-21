@@ -1,8 +1,12 @@
-1.0.13
+1.0.14
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.22.0
+  - Reviewed upstream release `8.22.0`, compare `8.21.0...8.22.0`, tag `98f1c46`, and relevant source for `bundle.packages.embed` plus `CHECKLY_MQTT_URL` on 2026-08-21.
+  - Added Playwright Check Suite guidance for embedding private-registry package tarballs with top-level `bundle.packages.embed`, including exact package specs, wildcard matching, lockfile eligibility, integrity checking, cache behavior, and runner dependency-cache implications.
+  - Documented `CHECKLY_MQTT_URL` as an advanced local/custom event-stream broker override analogous to `CHECKLY_API_URL`.
 - checkly-cli v8.21.0
   - Reviewed upstream release `8.21.0`, compare `8.20.0...8.21.0`, bundled Checkly skill guidance, construct source/tests, and live `checkly@8.21.0` version output on 2026-08-15.
   - Added structured check-intent guidance for supported runtime checks and uptime monitors, including `REQUIRED_OUTCOME` / `MUST_PRESERVE` constraints, validation limits, omit-versus-null deployment semantics, and the explicit-construct requirement for Playwright intent.
