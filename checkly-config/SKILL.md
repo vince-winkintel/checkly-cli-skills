@@ -68,7 +68,7 @@ See `checkly-playwright` for supported lockfiles, member-scoped pruning, cache e
 
 ### Dependency-cache invalidation
 
-Checkly caches installed dependencies for Playwright Check Suites using the bundle's dependency-install inputs, including lockfiles, manifests, registry configuration, and the resolved embedded/pruned package sets. To invalidate that cache persistently for deployed and scheduled suites, set a top-level string or safe integer and change it when dependencies must be reinstalled:
+Checkly caches installed dependencies for Playwright Check Suites using the workspace's dependency inputs—the lockfile plus every workspace member's `package.json` and `.npmrc`, whether or not that member is in the bundle—plus the bundle's own install inputs, including registry configuration and the resolved embedded/pruned package sets. The key can therefore change without a file edit when a different set of workspace members lands in the bundle. To invalidate that cache persistently for deployed and scheduled suites, set a top-level string or safe integer and change it when dependencies must be reinstalled:
 
 ```typescript
 export default defineConfig({

@@ -23,6 +23,7 @@ export default defineConfig({
     playwrightConfigPath: './playwright.config.ts',
     playwrightChecks: [
       {
+        logicalId: 'e2e-test-suite',
         name: 'E2E Test Suite',
         frequency: 10,
         testCommand: 'npm run test:e2e',
@@ -80,11 +81,13 @@ export default defineConfig({
 ```typescript
 playwrightChecks: [
   {
+    logicalId: 'chromium-tests',
     name: 'Chromium Tests',
     testCommand: 'npx playwright test --project=chromium',
     frequency: 5,
   },
   {
+    logicalId: 'cross-browser-tests',
     name: 'Cross-Browser Tests',
     testCommand: 'npx playwright test',
     frequency: 30,
@@ -94,20 +97,22 @@ playwrightChecks: [
 
 ## Private package registries
 
-For Playwright Check Suites, Checkly automatically bundles `.npmrc` from the project, workspace root, and each workspace-member package root. Do not add those files to `include`. pnpm 11 credentials from the global `auth.ini` are also available to CLI-side package downloads. Keep credentials as environment-variable references, never plaintext:
+For Playwright Check Suites, Checkly automatically bundles `.npmrc` from the workspace root and each workspace-member package root. Do not add those files to `include`. pnpm 11 credentials from the global `auth.ini` are also available to CLI-side package downloads. Keep credentials as environment-variable references, never plaintext:
 
 ```ini
 @company:registry=https://registry.example.com/
 //registry.example.com/:_authToken=${NPM_TOKEN}
 ```
 
-Runner-side installs resolve the reference from Checkly environment variables. CLI-side work such as embedded-package downloads and lockfile pruning resolves credentials on the machine running `checkly deploy` or `checkly test`, so provide the referenced variable through local or CI secrets too. Bun or Yarn credentials stored only in `bunfig.toml` or `.yarnrc.yml` are not used for these CLI-side downloads; duplicate registry/auth settings in `.npmrc` or `npm_config_*` variables.
+Runner-side installs resolve the reference from Checkly environment variables. CLI-side work such as embedded-package downloads and lockfile pruning reads the project, workspace-root, and user `.npmrc` files, `npm_config_*` variables, and pnpm's global `auth.ini` on the machine running `checkly deploy` or `checkly test`, so provide referenced variables through local or CI secrets too. Bun or Yarn credentials stored only in `bunfig.toml` or `.yarnrc.yml` are not used for these CLI-side downloads; duplicate registry/auth settings in `.npmrc` or `npm_config_*` variables.
 
 ### Automatic lockfile pruning
 
-For monorepos whose bundle includes only part of the workspace, Checkly automatically prunes the bundled lockfile to the bundle's dependency graph. The workspace files are unchanged. Supported inputs are pnpm lockfile versions 6/9, npm lockfile versions 2/3, text `bun.lock`, and Yarn Berry `yarn.lock`; Yarn Classic and binary `bun.lockb` are unsupported. The workspace package-manager binary must be available on the CLI machine.
+For monorepos whose bundle includes only part of the workspace, Checkly automatically prunes the bundled lockfile to the bundle's dependency graph. The workspace files are unchanged. Supported inputs are pnpm lockfile versions 6/9, npm lockfile versions 2/3, text `bun.lock`, and Yarn Berry `yarn.lock`; Yarn Classic is unsupported, and for binary `bun.lockb` regenerate a text lockfile with `bun install --save-text-lockfile`. The workspace package-manager binary must be available on the CLI machine.
 
 If pruning is required but cannot complete or verify, the original lockfile ships with a diagnostic. `CHECKLY_LOCKFILE_PRUNE=0` disables it only as a last resort. Prefer including the workspace member the checks actually import rather than carrying unrelated dependencies.
+
+For pnpm projects with `patchedDependencies`, Checkly filters out patches that only apply to unbundled workspace members. If the CLI names stale patch declarations, the lockfile is out of date with the config; refresh it with a regular install.
 
 ### Embedding private package tarballs
 
@@ -127,7 +132,7 @@ bundle: {
 
 Entries resolve against the workspace-root lockfile. A name embeds every selected version; `name@version` pins one version. `*` stays within a package-name segment, while `**` crosses `/` and can select scoped and unscoped names. A `!` entry subtracts from selections made before it, so order matters. A positive entry that contributes no embeddable package fails validation unless later exclusions deliberately remove its whole selection; unmatched exclusions are no-ops, and a final empty selection warns.
 
-The CLI verifies tarballs against lockfile integrity, or registry metadata for Yarn Berry. List every unreachable private dependency, including transitive ones; selecting a package does not automatically embed its private dependencies. Workspace, git, file, URL, and unverifiable entries must remain available through normal bundling or runner registry access. Pruned-out lockfile packages are not embedded because the runner will not install them.
+The CLI verifies tarballs against lockfile integrity, or registry metadata for Yarn Berry; Yarn Berry deploys therefore need registry access on every deploy, even with a warm cache. List every unreachable private dependency, including transitive ones; selecting a package does not automatically embed its private dependencies. Workspace, git, file, URL, and unverifiable entries must remain available through normal bundling or runner registry access. Pruned-out lockfile packages are not embedded because the runner will not install them.
 
 The cache defaults to `node_modules/.cache/checkly`; use `CHECKLY_CACHE_DIR` only for a deliberate writable/shared cache. Changing the embedded set invalidates the runner dependency cache.
 
@@ -179,7 +184,7 @@ Rules are first-match-wins and must end with the exact `**` catch-all. Upstreams
 
 ## Dependency cache invalidation
 
-Checkly keys installed dependencies from the bundle's dependency-install inputs, including lockfiles, manifests, registry configuration, and the resolved embedded/pruned package sets. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change the top-level cache version in `checkly.config.ts`:
+Checkly keys installed dependencies from the workspace's dependency inputs—the lockfile plus every workspace member's `package.json` and `.npmrc`, whether or not that member is in the bundle—plus the bundle's own install inputs, including registry configuration and the resolved embedded/pruned package sets. The key can therefore change without a file edit when a different set of workspace members lands in the bundle. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change the top-level cache version in `checkly.config.ts`:
 
 ```typescript
 export default defineConfig({
