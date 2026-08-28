@@ -16,13 +16,14 @@ Deploy entire Playwright test suite:
 export default defineConfig({
   bundle: {
     packages: {
-      embed: ['@acme/*', 'acme-*-utils', 'legacy-private-pkg@2.1.0'],
+      embed: ['@acme/**', '!@acme/public-*'],
     },
   },
   checks: {
     playwrightConfigPath: './playwright.config.ts',
     playwrightChecks: [
       {
+        logicalId: 'e2e-test-suite',
         name: 'E2E Test Suite',
         frequency: 10,
         testCommand: 'npm run test:e2e',
@@ -80,11 +81,13 @@ export default defineConfig({
 ```typescript
 playwrightChecks: [
   {
+    logicalId: 'chromium-tests',
     name: 'Chromium Tests',
     testCommand: 'npx playwright test --project=chromium',
     frequency: 5,
   },
   {
+    logicalId: 'cross-browser-tests',
     name: 'Cross-Browser Tests',
     testCommand: 'npx playwright test',
     frequency: 30,
@@ -94,61 +97,94 @@ playwrightChecks: [
 
 ## Private package registries
 
-For Playwright Check Suites, Checkly automatically bundles `.npmrc` from the workspace root and each workspace-member package root. Do not add those files manually to an `include` pattern. A `.npmrc` below a package root is not bundled because package managers do not read configuration from below the install directory.
-
-Because the bundled file is uploaded for the cloud install, reference credentials through an environment variable rather than storing a token in plaintext:
+For Playwright Check Suites, Checkly automatically bundles `.npmrc` from the workspace root and each workspace-member package root. Do not add those files to `include`. pnpm 11 credentials from the global `auth.ini` are also available to CLI-side package downloads. Keep credentials as environment-variable references, never plaintext:
 
 ```ini
 @company:registry=https://registry.example.com/
 //registry.example.com/:_authToken=${NPM_TOKEN}
 ```
 
-For normal runner-side installs, provide `NPM_TOKEN` through Checkly's locked environment variables. For CLI-side downloads such as embedded tarballs, provide it to the machine running `checkly deploy` or `checkly test`, typically through local or CI secrets. Changing a bundled `.npmrc` invalidates Checkly's workspace bundle cache.
+Runner-side installs resolve the reference from Checkly environment variables. CLI-side work such as embedded-package downloads and lockfile pruning applies `npm_config_*` variables first, followed by `.npmrc` files in per-key precedence: project, workspace root, then pnpm's global `auth.ini` before the user `.npmrc` for pnpm lockfiles—or the user `.npmrc` before `auth.ini` for other lockfiles. These sources are read on the machine running `checkly deploy` or `checkly test`, so provide referenced variables through local or CI secrets too. Bun or Yarn credentials stored only in `bunfig.toml` or `.yarnrc.yml` are not used for these CLI-side downloads; duplicate registry/auth settings in `.npmrc` or `npm_config_*` variables.
+
+### Automatic lockfile pruning
+
+For monorepos whose bundle includes only part of the workspace, Checkly automatically prunes the bundled lockfile to the bundle's dependency graph. The workspace files are unchanged. Supported inputs are pnpm lockfile versions 6/9, npm lockfile versions 2/3, text `bun.lock`, and Yarn Berry `yarn.lock`; Yarn Classic is unsupported, and for binary `bun.lockb` regenerate a text lockfile with `bun install --save-text-lockfile`. The workspace package-manager binary must be available on the CLI machine.
+
+If pruning is required but cannot complete or verify, the original lockfile ships with a diagnostic. `CHECKLY_LOCKFILE_PRUNE=0` disables it only as a last resort. Prefer including the workspace member the checks actually import rather than carrying unrelated dependencies.
+
+For pnpm projects with `patchedDependencies`, Checkly filters out patches that only apply to unbundled workspace members. If the CLI names stale patch declarations, the lockfile is out of date with the config; refresh it with a regular install.
 
 ### Embedding private package tarballs
 
-Use top-level `bundle.packages.embed` when a Playwright Check Suite depends on private-registry packages that Checkly runners cannot otherwise fetch. This is for packages in the Playwright suite dependency install, not for individual browser checks or multi-step checks:
+Use top-level `bundle.packages.embed` when runners cannot fetch specific Playwright Check Suite packages:
 
 ```typescript
-export default defineConfig({
-  projectName: 'My monitoring project',
-  logicalId: 'my-monitoring-project',
-  bundle: {
-    packages: {
-      embed: [
-        '@acme/*',
-        'acme-*-utils',
-        '@acme/legacy-client@2.1.0',
-      ],
-    },
+bundle: {
+  packages: {
+    embed: [
+      '@acme/**',
+      '!@acme/public-*',
+      '@vendor/legacy-client@2.1.0',
+    ],
   },
-  checks: {
-    playwrightConfigPath: './playwright.config.ts',
-    playwrightChecks: [
+}
+```
+
+Entries resolve against the workspace-root lockfile. A name embeds every selected version; `name@version` pins one version. `*` stays within a package-name segment, while `**` crosses `/` and can select scoped and unscoped names. A `!` entry subtracts from selections made before it, so order matters. A positive entry that contributes no embeddable package fails validation unless later exclusions deliberately remove its whole selection; unmatched exclusions are no-ops, and a final empty selection warns.
+
+The CLI verifies tarballs against lockfile integrity, or registry metadata for Yarn Berry. For embedded packages resolved from a Yarn Berry lockfile, every deploy needs registry access—even with a warm cache—to fetch package metadata before cache lookup. List every unreachable private dependency, including transitive ones; selecting a package does not automatically embed its private dependencies. Workspace, git, file, URL, and unverifiable entries must remain available through normal bundling or runner registry access. Pruned-out lockfile packages are not embedded because the runner will not install them.
+
+The cache defaults to `node_modules/.cache/checkly`; use `CHECKLY_CACHE_DIR` only for a deliberate writable/shared cache. Changing the embedded set invalidates the runner dependency cache.
+
+### Pruning bundled package manifests
+
+Use `bundle.packages.prune` to remove dependencies from uploaded `package.json` copies without modifying files on disk. This is useful for unused peer dependencies that pnpm `auto-install-peers` would otherwise install:
+
+```typescript
+bundle: {
+  packages: {
+    prune: [
+      { member: '.', remove: { devDependencies: ['docs-*'] } },
       {
-        logicalId: 'checkout-suite',
-        name: 'Checkout Suite',
-        testCommand: 'npx playwright test',
-        frequency: 10,
+        member: '@acme/e2e',
+        keep: { dependencies: ['@acme/test-utils', 'playwright'] },
       },
     ],
   },
-})
+}
 ```
 
-Each entry is resolved against the workspace-root `pnpm-lock.yaml` or `package-lock.json`. Use a package name to embed every lockfile version for that package, an exact `name@version` pin for one version, or name wildcards such as `@acme/*`, `acme-*`, and `@acme/*-utils`. A wildcard `*` matches characters inside one package-name segment and does not cross `/`, so `@acme/*` stays inside the `@acme` scope.
+The top-level value may instead be a global pattern array or a dependency-class map over `dependencies`, `devDependencies`, `peerDependencies`, and `optionalDependencies`; `true` removes a whole class. Patterns use the embed wildcard and ordered `!` exclusion grammar, but not `name@version`. Use `**`, not `*`, to include scoped names.
 
-Only pnpm lockfile versions 6 and 9 and npm lockfile versions 2 and 3 are supported. Yarn and Bun lockfiles fail validation. Every `embed` entry must match at least one embeddable registry package: an entry that matches nothing, or whose only matches cannot be embedded, fails validation. If a wildcard also matches workspace members, those matches are skipped silently. Git, file, URL, or integrity-less matches are skipped with a warning when the same entry also selects embeddable packages; the runner must still be able to fetch the skipped dependencies.
+Member-scoped entries select manifest names; `.` selects the workspace root. `remove` composes with other removals. `keep` declares the member's entire remaining dependency set, empties unmentioned classes, and overrides removals for that member, so prefer exact member names. Pruning is not checked against imported code: never remove a runtime dependency. When a lockfile is bundled, manifest pruning is applied only if lockfile pruning succeeds in the same run; otherwise original manifests ship with a warning.
 
-List every private package the runner cannot fetch, including transitive private dependencies. Embedding one package does not automatically embed the private packages it depends on. Workspace packages, git dependencies, file or URL dependencies, and lockfile entries without integrity hashes are not embeddable registry tarballs; keep those reachable through normal bundling or through a runner-accessible registry instead.
+### Runner registry routing
 
-The CLI verifies embedded tarballs against the lockfile integrity hash. It uses the local cache first, then npm's cache, then the registry using `.npmrc` registry and auth settings. The default Checkly cache is the workspace root's `node_modules/.cache/checkly`, with a per-user cache fallback; set `CHECKLY_CACHE_DIR` only when you need a writable or shared cache location. Keep registry credentials in `.npmrc` as environment-variable references. On a cold cache, the machine running `checkly deploy` or `checkly test` must have those variables in its own environment; locked Checkly variables do not authenticate this CLI-side download. Locked variables remain appropriate for runner-side installation of non-embedded private packages.
+When registry URLs work on the CLI machine but not from Checkly runners, configure runner-only routing:
 
-Changing the resolved embedded tarball set changes the runner dependency-cache key. If package inputs are unchanged but a deployed or scheduled suite needs a reinstall, use `caching.dependencyCache.version`; for one ad-hoc run, use `--refresh-cache`.
+```typescript
+runner: {
+  registries: {
+    upstreams: {
+      npmjs: { url: 'https://registry.npmjs.org/' },
+      internal: {
+        url: 'https://npm.example.com/',
+        auth: { type: 'bearer', token: '${INTERNAL_NPM_TOKEN}' },
+      },
+    },
+    packages: [
+      { pattern: '@acme/**', upstreams: ['internal'] },
+      { pattern: '**', upstreams: ['npmjs'] },
+    ],
+  },
+}
+```
+
+Rules are first-match-wins and must end with the exact `**` catch-all. Upstreams within one rule are attempted in order; failure does not fall through to a later broader rule, preventing private package-name leakage. Routing patterns support `*`/`**`, but not `!` or version pins. Bearer tokens must be exactly one `${VAR}` reference resolved from Checkly environment variables. Embedded packages take priority. This routing does not affect CLI-side downloads or lockfile pruning, which still use local registry configuration.
 
 ## Dependency cache invalidation
 
-Checkly keys installed dependencies from the lockfile, `package.json`, `.npmrc`, and the resolved `bundle.packages.embed` tarball set. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change the top-level cache version in `checkly.config.ts`:
+Checkly keys installed dependencies from the workspace's dependency inputs—the lockfile plus every workspace member's `package.json` and `.npmrc`, whether or not that member is in the bundle—plus the bundle's own install inputs, including registry configuration and the resolved embedded/pruned package sets. The key can therefore change without a file edit when a different set of workspace members lands in the bundle. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change the top-level cache version in `checkly.config.ts`:
 
 ```typescript
 export default defineConfig({

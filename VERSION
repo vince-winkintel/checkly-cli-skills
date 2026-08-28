@@ -1,8 +1,14 @@
-1.0.14
+1.0.15
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v8.23.0-v8.23.2
+  - Reviewed upstream releases `8.23.0`, `8.23.1`, and `8.23.2`, compare `8.22.0...8.23.2`, tag `519cfcbd`, bundled Playwright guidance, config types/tests, and live `checkly@8.23.2` version/help output on 2026-08-28.
+  - Expanded `bundle.packages.embed` guidance for ordered `!` exclusions, `**` cross-scope wildcards, automatic bundle lockfile pruning (including pnpm `patchedDependencies` filtering), Yarn Berry/Bun support, and pnpm `auth.ini` credentials.
+  - Added `bundle.packages.prune` guidance for dependency-class and workspace-member `remove`/`keep` rules, including lockfile-consistency and runtime-safety constraints.
+  - Added `runner.registries` routing for runner-only registry overrides with typed upstreams, first-match package rules, mandatory catch-all routing, and environment-reference-only bearer credentials.
+  - The `.npmrc` trailing-slash auth-key fix (#1448), bare `.` / `..` import resolution, and concurrent cache-write fixes required no separate workflow guidance.
 - checkly-cli v8.22.0
   - Reviewed upstream release `8.22.0`, compare `8.21.0...8.22.0`, tag `98f1c46`, and relevant source for `bundle.packages.embed` plus `CHECKLY_MQTT_URL` on 2026-08-21.
   - Added Playwright Check Suite guidance for embedding private-registry package tarballs with top-level `bundle.packages.embed`, including exact package specs, wildcard matching, lockfile eligibility, integrity checking, cache behavior, and runner dependency-cache implications.
