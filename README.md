@@ -51,6 +51,7 @@ Example prompts for AI agents:
 - "Audit Checkly account members and pending invites"
 - "Inspect a recorded Checkly test session failure"
 - "Investigate why a Checkly alert did or did not fire"
+- "Create a component-based v3 status page with automated incidents"
 
 ## Templates
 
@@ -81,7 +82,7 @@ The [`references/`](./references) directory contains:
 ## Prerequisites
 
 - **Checkly Account**: Sign up at [checklyhq.com/signup](https://www.checklyhq.com/signup)
-- **Node.js**: Version 18 or higher
+- **Node.js**: Version 22.13.0 or higher
 - **Checkly CLI**: Installed via `npm create checkly@latest` or `npm install -g checkly`
 
 ## Install Checkly CLI
