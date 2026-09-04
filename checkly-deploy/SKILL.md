@@ -188,10 +188,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '22.13.0'
       
       - name: Install dependencies
         run: npm ci
@@ -280,7 +280,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - run: npm ci
       - run: npx checkly test  # Test on all branches
         env:
@@ -292,7 +292,7 @@ jobs:
     if: github.ref == 'refs/heads/main'  # Deploy only on main
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - run: npm ci
       - run: npx checkly deploy --force
         env:

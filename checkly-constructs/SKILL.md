@@ -25,7 +25,10 @@ Construct (base)
 │   ├── DnsMonitor
 │   └── UrlMonitor
 ├── CheckGroup
-└── AlertChannel
+├── AlertChannel
+├── StatusPage / StatusPageV3
+├── StatusPageV3Component
+└── StatusPageV3AutomationRule
 ```
 
 ### Logical IDs
@@ -50,6 +53,55 @@ new ApiCheck('api-status-check', {  // <- logical ID
 3. **Bundling**: Code and dependencies packaged
 4. **Synthesis**: Converted to API payload
 5. **Deployment**: Created/updated in Checkly
+
+## Component-based Status Page V3
+
+Import `StatusPageV3`, `StatusPageV3Component`, and `StatusPageV3AutomationRule` from `checkly/constructs`. A v3 page has no legacy cards or `StatusPageService` resources: declare its hierarchy with components that point to the page. A `SERVICE` may be nested beneath a same-page `GROUP` through `parent`.
+
+```typescript
+import {
+  StatusPageV3,
+  StatusPageV3AutomationRule,
+  StatusPageV3Component,
+} from 'checkly/constructs'
+
+const statusPage = new StatusPageV3('example-status-page-v3', {
+  name: 'Example Status Page',
+  url: 'example-status-page-v3',
+  customDomain: 'status.example.com',
+  defaultTheme: 'AUTO',
+})
+
+const webApp = new StatusPageV3Component('example-web-app-group', {
+  statusPage,
+  type: 'GROUP',
+  name: 'Web application',
+  displayOrder: 1,
+})
+
+const signUp = new StatusPageV3Component('example-sign-up-service', {
+  statusPage,
+  parent: webApp,
+  type: 'SERVICE',
+  name: 'Sign up',
+  description: 'The sign up flow',
+  displayOrder: 1,
+})
+
+new StatusPageV3AutomationRule('example-api-down-rule', {
+  statusPage,
+  name: 'API down',
+  firstUpdate: 'The API is down, we are investigating.',
+  lastUpdate: 'The API has recovered.',
+  tags: ['api:public'],
+  coolDownMinutes: 5,
+  components: [{ component: signUp, targetImpact: 'MAJOR_OUTAGE' }],
+})
+```
+
+Automation rules open one incident when a failing check or its group has any tag listed by the rule, apply each component's `targetImpact`, and resolve the incident on recovery. They require Checkly's automated incident management add-on. `tags` must contain at least one item; target impacts are `UNDER_MAINTENANCE`, `DEGRADED_PERFORMANCE`, `PARTIAL_OUTAGE`, or `MAJOR_OUTAGE`.
+
+Use `StatusPageV3.fromId(<physical-id>)` and `StatusPageV3Component.fromId(<physical-id>)` when code should reference existing UI-managed resources without managing them. A deployed logical ID cannot change generation between `StatusPage` and `StatusPageV3`; use a new logical ID for a v3 migration rather than redeploying the legacy ID as a different resource shape.
 
 ## Structured check intent
 

@@ -28,7 +28,7 @@ metadata:
           ],
         "notes":
           [
-            "Requires Checkly account and API key (signup at checklyhq.com/signup or via 'npx checkly login').",
+            "Requires Node.js 22.13.0 or later, plus a Checkly account and API key (signup at checklyhq.com/signup or via 'npx checkly login').",
             "Credentials can be set via environment variables (CHECKLY_API_KEY, CHECKLY_ACCOUNT_ID) or stored in ~/.config/@checkly/cli/config.json via 'npx checkly login'.",
             "Config stored in checkly.config.ts and auth credentials in system config.",
             "Browser checks optionally require playwright binary and @playwright/test dependency.",
@@ -40,6 +40,8 @@ metadata:
 # Checkly CLI Skills
 
 Comprehensive Checkly CLI command reference and Monitoring as Code (MaC) workflows.
+
+The current Checkly CLI requires Node.js 22.13.0 or later. Verify `node --version` before install, init, test, or deploy workflows; upgrading only the project dependency does not bypass the CLI's host-runtime floor.
 
 ## Choose CLI or MCP first
 

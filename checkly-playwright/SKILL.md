@@ -184,21 +184,23 @@ Rules are first-match-wins and must end with the exact `**` catch-all. Upstreams
 
 ## Dependency cache invalidation
 
-Checkly keys installed dependencies from the workspace's dependency inputs—the lockfile plus every workspace member's `package.json` and `.npmrc`, whether or not that member is in the bundle—plus the bundle's own install inputs, including registry configuration and the resolved embedded/pruned package sets. The key can therefore change without a file edit when a different set of workspace members lands in the bundle. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change the top-level cache version in `checkly.config.ts`:
+Checkly keys installed dependencies from the workspace's dependency inputs—the lockfile plus every workspace member's `package.json` and `.npmrc`, whether or not that member is in the bundle—plus the bundle's own install inputs, including registry configuration and the resolved embedded/pruned package sets. The key can therefore change without a file edit when a different set of workspace members lands in the bundle. If those inputs are unchanged but a deployed or scheduled Playwright Check Suite needs a persistent reinstall, change `runner.cache.install.version` in `checkly.config.ts`:
 
 ```typescript
 export default defineConfig({
   projectName: 'My monitoring project',
   logicalId: 'my-monitoring-project',
-  caching: {
-    dependencyCache: {
-      version: '2', // string or safe integer; change to invalidate
+  runner: {
+    cache: {
+      install: {
+        version: '2', // string or safe integer; change to invalidate
+      },
     },
   },
 })
 ```
 
-Do not place `caching` on an individual suite or check: one uploaded code bundle serves all Playwright Check Suites. Unset and empty-string versions leave the key unchanged. For a one-off reinstall during an ad-hoc run, use `--refresh-cache` on `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead.
+Do not place cache configuration on an individual suite or check: one uploaded code bundle serves all Playwright Check Suites. Unset and empty-string versions leave the key unchanged. The deprecated `caching.dependencyCache.version` alias still works with a warning; upgrade every CLI environment before migrating, then remove the old property because declaring it together with `runner.cache.install.version` fails config loading. For a one-off reinstall during an ad-hoc run, use `--refresh-cache` on `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead.
 
 ## Related Skills
 

@@ -17,11 +17,6 @@ export default defineConfig({
   projectName: 'My App',
   logicalId: 'my-app-monitoring',
   repoUrl: 'https://github.com/acme/my-app',
-  caching: {
-    dependencyCache: {
-      version: '2026-08-11',
-    },
-  },
   checks: {
     frequency: 5,
     locations: ['us-east-1', 'eu-west-1'],
@@ -41,6 +36,11 @@ export default defineConfig({
     },
   },
   runner: {
+    cache: {
+      install: {
+        version: '2026-09-04',
+      },
+    },
     registries: {
       upstreams: {
         npmjs: { url: 'https://registry.npmjs.org/' },
@@ -68,21 +68,29 @@ See `checkly-playwright` for supported lockfiles, member-scoped pruning, cache e
 
 ### Dependency-cache invalidation
 
-Checkly caches installed dependencies for Playwright Check Suites using the workspace's dependency inputs—the lockfile plus every workspace member's `package.json` and `.npmrc`, whether or not that member is in the bundle—plus the bundle's own install inputs, including registry configuration and the resolved embedded/pruned package sets. The key can therefore change without a file edit when a different set of workspace members lands in the bundle. To invalidate that cache persistently for deployed and scheduled suites, set a top-level string or safe integer and change it when dependencies must be reinstalled:
+Checkly caches installed dependencies for Playwright Check Suites using the workspace's dependency inputs—the lockfile plus every workspace member's `package.json` and `.npmrc`, whether or not that member is in the bundle—plus the bundle's own install inputs, including registry configuration and the resolved embedded/pruned package sets. The key can therefore change without a file edit when a different set of workspace members lands in the bundle. To invalidate that cache persistently for deployed and scheduled suites, set `runner.cache.install.version` to a string or safe integer and change it when dependencies must be reinstalled:
 
 ```typescript
 export default defineConfig({
   projectName: 'My App',
   logicalId: 'my-app-monitoring',
-  caching: {
-    dependencyCache: {
-      version: process.env.DEPENDENCY_CACHE_VERSION,
+  runner: {
+    cache: {
+      install: {
+        version: process.env.DEPENDENCY_CACHE_VERSION,
+      },
     },
   },
 })
 ```
 
-This setting is top-level because one code bundle serves all Playwright Check Suites. An unset or empty-string value leaves the cache key unchanged, so an optional environment variable is safe. For one ad-hoc reinstall, use `--refresh-cache` with `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead of changing committed configuration.
+This runner-level setting applies to the one code bundle shared by all Playwright Check Suites. An unset or empty-string value leaves the cache key unchanged, so an optional environment variable is safe. The old `caching.dependencyCache.version` location is deprecated but still works with a warning. Upgrade every environment that runs the CLI before migrating, then remove the old property and set `runner.cache.install.version`; declaring both locations is a fatal config error. For one ad-hoc reinstall, use `--refresh-cache` with `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead of changing committed configuration.
+
+## Configuration validation diagnostics
+
+Commands that load `checkly.config.*` collect configuration problems and render them with config-file attribution instead of stopping at the first error. `test`, `pw-test`, `validate`, `deploy`, and `import plan` show config diagnostics before project or construct diagnostics; fatal config diagnostics exit with status 1. Read and fix the full set before rerunning rather than addressing only the first line.
+
+`checkly trigger` also rejects an invalid config instead of silently continuing. A missing or otherwise unloadable config can still be tolerated by trigger-only workflows, so use `npx checkly validate` when the config itself must be proved valid. Deprecation diagnostics such as the legacy cache-property warning are non-fatal, but should still be migrated after every CLI environment is current. Diagnostics may be rendered on stdout; automation must use the process exit status rather than assuming stderr contains every failure.
 
 ## Configuration file structure
 
