@@ -76,6 +76,12 @@ export default defineConfig({
 })
 ```
 
+### Runtime engine auto-detection
+
+When an explicit `engine` is omitted from a `PlaywrightCheck`, the CLI resolves Node and Bun candidates separately. It reads `.node-version`, `.nvmrc`, `.tool-versions`, `.bun-version`, and `package.json` `engines` only from the project root (`Session.basePath`); member-level copies beside a nested Checkly config are ignored. Only Volta lookup starts at the package containing the Checkly config. A Node candidate always wins over a Bun candidate, so `.bun-version` or `engines.bun` selects Bun only when no Node source resolves. Among Node sources, `.node-version`, `.nvmrc`, and the `nodejs` entry in `.tool-versions` override Volta, which overrides `engines.node`.
+
+For Volta, the CLI walks from the config package toward the project root and stops at the nearest `package.json` with a `volta` object, even if that object and its `volta.extends` chain provide no `node` pin; a member-level block that only pins a package manager therefore hides a root Volta Node pin. A valid semver range in `volta.node` or `engines.node` resolves to its minimum major (`>=22` selects Node 22). Non-semver values fall through, as do `.nvmrc` aliases `lts/*`, `lts`, `node`, `stable`, and `latest`. Volta does not select Bun. For an explicit override, import `Engine` from `checkly/constructs` and set `engine: Engine.node(...)` or `Engine.bun(...)` when repository metadata is ambiguous or the Checkly runtime must intentionally differ from local tooling.
+
 ## Multiple projects
 
 ```typescript
@@ -108,9 +114,9 @@ Runner-side installs resolve the reference from Checkly environment variables. C
 
 ### Automatic lockfile pruning
 
-For monorepos whose bundle includes only part of the workspace, Checkly automatically prunes the bundled lockfile to the bundle's dependency graph. The workspace files are unchanged. Supported inputs are pnpm lockfile versions 6/9, npm lockfile versions 2/3, text `bun.lock`, and Yarn Berry `yarn.lock`; Yarn Classic is unsupported, and for binary `bun.lockb` regenerate a text lockfile with `bun install --save-text-lockfile`. The workspace package-manager binary must be available on the CLI machine.
+For monorepos whose bundle includes only part of the workspace, Checkly automatically prunes the bundled lockfile to the bundle's dependency graph. The workspace files are unchanged. Supported inputs are pnpm lockfile versions 6/9, npm lockfile versions 2/3, text `bun.lock`, and Yarn Berry `yarn.lock`; Yarn Classic is unsupported, and for binary `bun.lockb` regenerate a text lockfile with `bun install --save-text-lockfile`. The workspace package-manager binary must be available on the CLI machine. npm and pnpm prefer cached registry metadata and contact the registry only for cache misses; pnpm also pins pruning to the workspace's own content-addressable store so a temporary directory on another filesystem does not silently use an empty store.
 
-If pruning is required but cannot complete or verify, the original lockfile ships with a diagnostic. `CHECKLY_LOCKFILE_PRUNE=0` disables it only as a last resort. Prefer including the workspace member the checks actually import rather than carrying unrelated dependencies.
+The prune budget defaults to 30 seconds. Set `CHECKLY_LOCKFILE_PRUNE_TIMEOUT=<seconds>` when a cold or slow registry legitimately needs more time; `0` disables the timeout, while invalid values are ignored. Whenever pruning is required but cannot run or its result cannot be verified—including when the package-manager binary is unavailable or the pnpm store directory cannot be determined—the original lockfile ships unchanged and the CLI emits a warning or note explaining why. For a timeout, the diagnostic names the timeout override and package-manager partial output is logged; for a subset-verification failure, the diagnostic names unexpected entries and the full list is logged. Enable these details with `DEBUG='checkly:cli:services:check-parser:*'`. `CHECKLY_LOCKFILE_PRUNE=0` disables pruning only as a last resort. Prefer fixing cache/store access or including the workspace member the checks actually import rather than carrying unrelated dependencies.
 
 For pnpm projects with `patchedDependencies`, Checkly filters out patches that only apply to unbundled workspace members. If the CLI names stale patch declarations, the lockfile is out of date with the config; refresh it with a regular install.
 
