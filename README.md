@@ -18,6 +18,7 @@ npx skills add vince-winkintel/checkly-cli-skills
 - **[checkly-auth](./checkly-auth)** - Authentication and login
 - **[checkly-config](./checkly-config)** - Configuration files and project setup
 - **[checkly-members](./checkly-members)** - Account member and pending-invite listing, role updates, and removals
+- **[checkly-usage](./checkly-usage)** - Organization contract terms, credit usage, projections, and grouped usage series
 
 ### Core Workflows
 - **[checkly-test](./checkly-test)** - Local testing with `npx checkly test`
@@ -49,6 +50,7 @@ Example prompts for AI agents:
 - "Monitor TLS certificate expiry and TLS version"
 - "Trace a network path and alert on hop count or packet loss"
 - "Audit Checkly account members and pending invites"
+- "Review Checkly contract credit usage and projected exhaustion"
 - "Inspect a recorded Checkly test session failure"
 - "Investigate why a Checkly alert did or did not fire"
 - "Create a component-based v3 status page with automated incidents"
