@@ -4,9 +4,9 @@ Release/version change metadata for this skill set lives here, not in individual
 
 Historical notes consolidated from skill docs:
 - checkly-cli v9.3.0
-  - Reviewed upstream release `9.3.0`, compare `9.2.0...9.3.0`, tag `fa81627`, the integrity-verified npm package, source/tests, and live account/usage help output on 2026-09-08.
-  - Added `checkly-usage` coverage for organization usage terms, date-range summaries, credit projections, account/check-type filters, grouped series, cursor pagination, output modes, permissions, warnings, and usage-specific error handling.
-  - Updated the orchestrator and package README so Agent Skills discovery routes contract-usage requests to the new standalone skill.
+  - Reviewed upstream release `9.3.0`, compare `9.2.0...9.3.0`, tag `fa81627`, the integrity-verified npm package, source/types/tests, and exact Checkly CLI `9.3.0` account-plan/usage help output on 2026-09-09.
+  - Added `checkly-usage` coverage for account plans and entitlements plus organization usage terms, pinned date ranges, JSON response contracts, credit projections, filters, grouped series, nullable cursors, literal warnings, permissions, and all usage-specific error codes.
+  - Distinguished current user/service API keys from rejected legacy credentials in `checkly-auth`, and updated the orchestrator and package README to route plan/entitlement questions separately from contract-credit usage.
 - checkly-cli v9.2.0
   - Reviewed upstream release `9.2.0`, compare `9.1.0...9.2.0`, tag `2ea1376`, the checksum-verified npm package, bundled Playwright guidance, engine-detection source/tests, and live version/root help output on 2026-09-05.
   - Added Playwright Check Suite engine-detection guidance for Volta's nearest `package.json` Node pin and its priority relative to dedicated version files and `engines.node`.
