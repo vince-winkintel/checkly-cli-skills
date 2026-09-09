@@ -1,6 +1,6 @@
 ---
 name: checkly-cli-skills
-description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, gRPC/SSL/traceroute monitors, check deployment, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, monitors, testing, deployment, imports, constructs, and advanced patterns. Triggers on checkly, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
+description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, gRPC/SSL/traceroute monitors, check deployment, account plans, entitlements, organization usage, credits, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, monitors, testing, deployment, imports, account plan and usage, constructs, and advanced patterns. Triggers on checkly, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
 metadata:
   {
     "openclaw":
@@ -94,6 +94,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 - `checkly-auth` - Authentication setup and login
 - `checkly-config` - Configuration files (checkly.config.ts) and project structure
 - `checkly-members` - Account member and pending-invite listing, role updates, and removals
+- `checkly-usage` - Account plan/entitlements plus organization contract terms, credit usage, projections, and grouped usage series
 
 **Core Workflows:**
 - `checkly-test` - Local testing workflow with npx checkly test
@@ -112,6 +113,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 
 **Operations:**
 - `checkly-members` - Audit and manage Checkly account access with `npx checkly members`
+- `checkly-usage` - Route account questions precisely: `npx checkly account plan` for plans, entitlements, feature limits, or private-location availability; `npx checkly account usage terms/summary/series` for organization contract credits and consumption
 - `checkly-test` - Also covers `npx checkly test-sessions` for recorded test-session drilldown and RCA context
 - `checkly-checks` - Inspect, run, and delete deployed checks with `npx checkly checks`; confirm live-run targets before `checks run`, and use `checks delete --dry-run` before destructive deletes
 - `checkly-assets` - List/download result assets such as logs, traces, videos, screenshots, pcap, reports, and files for failure investigation
@@ -423,6 +425,7 @@ checkly test
 - See `checkly-auth` for authentication setup
 - See `checkly-config` for project configuration
 - See `checkly-test` for local testing workflow
+- See `checkly-usage` for account plans, entitlements, contract credits, and usage reporting
 
 **Creating checks:**
 - See `checkly-checks` for API and browser checks

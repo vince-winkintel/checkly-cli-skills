@@ -655,5 +655,6 @@ await page.click('text=Submit')
 
 - See `checkly-test` to test checks locally
 - See `checkly-deploy` to deploy checks
+- See `checkly-usage` to inspect the contract-credit usage consumed by deployed `checks run` sessions
 - See `checkly-playwright` for full test suites
 - See `checkly-advanced` for retry strategies
