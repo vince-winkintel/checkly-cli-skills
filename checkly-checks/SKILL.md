@@ -62,7 +62,7 @@ new BrowserCheck('checkout-browser', {
 - Use `true` or `false` to override the account default for that check.
 - Use `null` to make the check inherit the account-level setting explicitly.
 
-This property is not supported by `ApiCheck`, `PlaywrightCheck`, monitors, or agentic checks. Do not infer support from the separate `intent` property, which has a wider construct surface.
+This property is not supported by `ApiCheck`, `PlaywrightCheck`, monitors, or agentic checks. TypeScript rejects it on those construct props, but a plain-JavaScript project receives no validation diagnostic: the value is silently omitted from the synthesized payload. A clean `checkly test` or `checkly deploy` therefore does not prove that an unsupported JavaScript setting was applied. Do not infer support from the separate `intent` property, which has a wider construct surface.
 
 ## API Checks
 

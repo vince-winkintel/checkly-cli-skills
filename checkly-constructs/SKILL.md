@@ -16,14 +16,20 @@ Construct (base)
 ├── Check
 │   ├── RuntimeCheck
 │   │   ├── ApiCheck
-│   │   ├── BrowserCheck
-│   │   └── MultiStepCheck
-│   └── PlaywrightCheck
-├── Monitor
-│   ├── HeartbeatMonitor
-│   ├── TcpMonitor
-│   ├── DnsMonitor
-│   └── UrlMonitor
+│   │   ├── PlaywrightCheck
+│   │   └── RepairableRuntimeCheck
+│   │       ├── BrowserCheck
+│   │       └── MultiStepCheck
+│   ├── AgenticCheck
+│   └── Monitor
+│       ├── HeartbeatMonitor
+│       ├── TcpMonitor
+│       ├── DnsMonitor
+│       ├── IcmpMonitor
+│       ├── UrlMonitor
+│       ├── GrpcMonitor
+│       ├── SslMonitor
+│       └── TracerouteMonitor
 ├── CheckGroup
 ├── AlertChannel
 ├── StatusPage / StatusPageV3
