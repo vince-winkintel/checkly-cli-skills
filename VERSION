@@ -1,8 +1,13 @@
-1.0.18
+1.0.19
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v9.4.0-v9.5.0
+  - Reviewed upstream releases `9.4.0` and `9.5.0`, compare `9.3.0...9.5.0`, tags `cac349a` and `6a34c37`, and the released construct source/types/tests on 2026-09-16.
+  - Added automatic-check-repair ownership guidance for `BrowserCheck` and `MultiStepCheck`, including omit, explicit boolean, and account-inheritance semantics.
+  - Expanded Status Page V3 guidance for component history/expansion settings, footer support links, and plan-gated light/dark theme colors with strict hex validation.
+  - Documented transparent pnpm 12 multi-document lockfile handling during Playwright bundle inspection and pruning. Deploy source-file attribution is API metadata and adds no operator-facing command or flag.
 - checkly-cli v9.3.0
   - Reviewed upstream release `9.3.0`, compare `9.2.0...9.3.0`, tag `fa81627`, the integrity-verified npm package, source/types/tests, and exact Checkly CLI `9.3.0` account-plan/usage help output on 2026-09-09.
   - Added `checkly-usage` coverage for account plans and entitlements plus organization usage terms, pinned date ranges, JSON response contracts, credit projections, filters, grouped series, nullable cursors, literal warnings, permissions, and all usage-specific error codes.

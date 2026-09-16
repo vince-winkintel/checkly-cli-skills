@@ -46,6 +46,24 @@ new ApiCheck('dashboard-api', {
 
 Intent is separate from the check description and executable assertions. Omit `intent` to preserve existing backend-authored intent; use an object to set/update it; use `intent: null` only to clear it deliberately. The CLI trims values and rejects unknown fields. `goal` is required and limited to 2,000 characters. Constraint types are exact uppercase `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 characters per statement.
 
+## Automatic check repair
+
+`BrowserCheck` and `MultiStepCheck` can manage their automatic-repair override with `aiAutoRepairEnabled`:
+
+```typescript
+new BrowserCheck('checkout-browser', {
+  name: 'Checkout browser flow',
+  code: { entrypoint: './checkout.spec.ts' },
+  aiAutoRepairEnabled: true,
+})
+```
+
+- Omit the property to leave any existing backend-authored setting unchanged.
+- Use `true` or `false` to override the account default for that check.
+- Use `null` to make the check inherit the account-level setting explicitly.
+
+This property is not supported by `ApiCheck`, `PlaywrightCheck`, monitors, or agentic checks. Do not infer support from the separate `intent` property, which has a wider construct surface.
+
 ## API Checks
 
 Monitor HTTP endpoints with assertions.
