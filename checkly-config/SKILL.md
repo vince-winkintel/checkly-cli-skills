@@ -92,6 +92,8 @@ Commands that load `checkly.config.*` collect configuration problems and render 
 
 `checkly trigger` also rejects an invalid config instead of silently continuing. A missing or otherwise unloadable config can still be tolerated by trigger-only workflows, so use `npx checkly validate` when the config itself must be proved valid. Deprecation diagnostics such as the legacy cache-property warning are non-fatal, but should still be migrated after every CLI environment is current. Diagnostics may be rendered on stdout; automation must use the process exit status rather than assuming stderr contains every failure.
 
+Constructs may be declared directly in `checkly.config.*`. The CLI records that config file as their declaring source, so relative paths on those constructs resolve from the config file's directory rather than the shell's working directory. This includes a config-declared `CheckGroup`'s `browserChecks.testMatch` and a setup script's `entrypoint`; keep those paths relative to the config file and do not rewrite them as process-relative workarounds.
+
 ## Configuration file structure
 
 ### Required properties

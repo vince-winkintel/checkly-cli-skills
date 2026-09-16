@@ -16,14 +16,20 @@ Construct (base)
 ├── Check
 │   ├── RuntimeCheck
 │   │   ├── ApiCheck
-│   │   ├── BrowserCheck
-│   │   └── MultiStepCheck
-│   └── PlaywrightCheck
-├── Monitor
-│   ├── HeartbeatMonitor
-│   ├── TcpMonitor
-│   ├── DnsMonitor
-│   └── UrlMonitor
+│   │   ├── PlaywrightCheck
+│   │   └── RepairableRuntimeCheck
+│   │       ├── BrowserCheck
+│   │       └── MultiStepCheck
+│   ├── AgenticCheck
+│   └── Monitor
+│       ├── HeartbeatMonitor
+│       ├── TcpMonitor
+│       ├── DnsMonitor
+│       ├── IcmpMonitor
+│       ├── UrlMonitor
+│       ├── GrpcMonitor
+│       ├── SslMonitor
+│       └── TracerouteMonitor
 ├── CheckGroup
 ├── AlertChannel
 ├── StatusPage / StatusPageV3
@@ -70,6 +76,14 @@ const statusPage = new StatusPageV3('example-status-page-v3', {
   url: 'example-status-page-v3',
   customDomain: 'status.example.com',
   defaultTheme: 'AUTO',
+  supportLink: 'https://support.example.com',
+  themeColors: {
+    light: {
+      linkFontColor: '#005AC2',
+      primaryButtonBackgroundColor: '#151A1E',
+    },
+    dark: { linkFontColor: '#248AFF' },
+  },
 })
 
 const webApp = new StatusPageV3Component('example-web-app-group', {
@@ -77,6 +91,7 @@ const webApp = new StatusPageV3Component('example-web-app-group', {
   type: 'GROUP',
   name: 'Web application',
   displayOrder: 1,
+  expandedByDefault: true,
 })
 
 const signUp = new StatusPageV3Component('example-sign-up-service', {
@@ -86,6 +101,7 @@ const signUp = new StatusPageV3Component('example-sign-up-service', {
   name: 'Sign up',
   description: 'The sign up flow',
   displayOrder: 1,
+  showHistoricalData: false,
 })
 
 new StatusPageV3AutomationRule('example-api-down-rule', {
@@ -100,6 +116,8 @@ new StatusPageV3AutomationRule('example-api-down-rule', {
 ```
 
 Automation rules open one incident when a failing check or its group has any tag listed by the rule, apply each component's `targetImpact`, and resolve the incident on recovery. They require Checkly's automated incident management add-on. `tags` must contain at least one item; target impacts are `UNDER_MAINTENANCE`, `DEGRADED_PERFORMANCE`, `PARTIAL_OUTAGE`, or `MAJOR_OUTAGE`.
+
+Both component types accept `showHistoricalData` (default `true`); only a `GROUP` accepts `expandedByDefault` (default `false`). Omit either property to keep the backend default. `supportLink` appears in the page footer. `themeColors.light` and `themeColors.dark` accept partial color maps, so unspecified colors retain Checkly defaults; values must be three- or six-digit hex strings and unknown color keys fail validation. Custom theme colors require the corresponding Checkly plan feature.
 
 Use `StatusPageV3.fromId(<physical-id>)` and `StatusPageV3Component.fromId(<physical-id>)` when code should reference existing UI-managed resources without managing them. A deployed logical ID cannot change generation between `StatusPage` and `StatusPageV3`; use a new logical ID for a v3 migration rather than redeploying the legacy ID as a different resource shape.
 
