@@ -81,7 +81,7 @@ Commit is permanent even though it does not directly delete resources. After com
 
 ## Confirmation protocol for commit and cancel
 
-In agent mode, `import commit` and `import cancel` without `--force` return exit code 2 and JSON with:
+In agent mode, `import commit` and `import cancel` without `--force` return exit code 3 and JSON with:
 
 - `status: "confirmation_required"`
 - a human-readable `changes` array

@@ -1,8 +1,17 @@
-1.0.19
+1.0.20
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+- checkly-cli v10.0.0
+  - Reviewed the complete major-release notes, official source tag 4f88d60 and integrity-verified published npm artifact on 2026-10-27.
+  - Refreshed deploy plans/tokens/drift/write-back, baseline resets and opt-in immediate scheduling; updated stream routing, confirmation exit 3 and invalid-input exit 2.
+  - Migrated usage reporting to the v2 terms/term/summary/series/projections contract, device-flow authentication and immutable account/endpoint selection.
+  - Updated empty-selection, timeout, early-stop, retry and CI reporter guidance; documented project delegation, native TypeScript parsing, maintenance scopes, FlatBuffers and Bun engines.
+  - Agentic Checks retire on 2026-12-01; projects needing to manage them until retirement must remain on 9.x. The current guidance migrates to supported repairable checks.
+  - Removed obsolete construct usage, corrected runnable monitor/script examples, and validated templates against checkly@10.0.0 with matching Playwright in an isolated consumer.
+  - Review remediation: preserved removed-resource history in CI examples and restored a gated runtime/secret-wired pipeline; distinguished REST groupId/doubleCheck from removed construct inputs; linked the temporary Agentic Checks compatibility path; restored unsupported plain-JavaScript repair-input caveats; unified intent ownership; made usage-role diagnosis actionable without equating member roles to service-key permissions; kept the default-project helper no-argument with fail-closed argument rejection and direct confirmation replay; fixed the import authentication diagnostic stream.
+
 - checkly-cli v9.4.0-v9.5.0
   - Reviewed upstream releases `9.4.0` and `9.5.0`, compare `9.3.0...9.5.0`, tags `cac349a` and `6a34c37`, and the released construct source/types/tests on 2026-09-16.
   - Added automatic-check-repair ownership guidance for `BrowserCheck` and `MultiStepCheck`, including omit, explicit boolean, and account-inheritance semantics.

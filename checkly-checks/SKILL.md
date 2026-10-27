@@ -13,7 +13,7 @@ Create API checks, browser checks, and multi-step checks.
 |------------|----------|------------|
 | **API Check** | HTTP endpoints, REST APIs | HTTP requests + assertions |
 | **Browser Check** | Web applications, user flows | Playwright/Puppeteer |
-| **Multi-Step Check** | Complex browser workflows | Playwright (legacy) |
+| **Multi-Step Check** | Sequential API workflows | Playwright request API |
 | **Playwright Check Suite** | Full test suites | Playwright projects |
 
 ## Structured check intent
@@ -44,7 +44,7 @@ new ApiCheck('dashboard-api', {
 })
 ```
 
-Intent is separate from the check description and executable assertions. Omit `intent` to preserve existing backend-authored intent; use an object to set/update it; use `intent: null` only to clear it deliberately. The CLI trims values and rejects unknown fields. `goal` is required and limited to 2,000 characters. Constraint types are exact uppercase `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 characters per statement.
+Intent is separate from the check description and executable assertions. Provide an object to set or update intent; omit it or set `intent: null` to have none. Both omission and `null` clear any web-authored intent on deployment. The CLI trims values and rejects unknown fields. `goal` is required and limited to 2,000 characters. Constraint types are exact uppercase `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 characters per statement.
 
 ## Automatic check repair
 
@@ -58,11 +58,13 @@ new BrowserCheck('checkout-browser', {
 })
 ```
 
-- Omit the property to leave any existing backend-authored setting unchanged.
+- Omit the property to reset the check to account-level inheritance on deployment.
 - Use `true` or `false` to override the account default for that check.
 - Use `null` to make the check inherit the account-level setting explicitly.
 
-This property is not supported by `ApiCheck`, `PlaywrightCheck`, monitors, or agentic checks. TypeScript rejects it on those construct props, but a plain-JavaScript project receives no validation diagnostic: the value is silently omitted from the synthesized payload. A clean `checkly test` or `checkly deploy` therefore does not prove that an unsupported JavaScript setting was applied. Do not infer support from the separate `intent` property, which has a wider construct surface.
+Only `true`, `false` or `null` are accepted; other values fail validation. Use this property only on `BrowserCheck` and `MultiStepCheck`. Do not infer support from `intent`, which has a wider construct surface. Deployment resets omitted overrides to account inheritance; preserve a desired per-check web setting by declaring it in code.
+
+On unsupported constructs such as `ApiCheck`, `PlaywrightCheck`, and monitors, TypeScript rejects `aiAutoRepairEnabled`, but plain JavaScript (or a type assertion) can pass it without a diagnostic. The unsupported input is ignored; synthesis sends the base account-inheritance value, not the requested override. A clean local validation, test, or deployment therefore does not prove automatic repair was enabled. This is different from the explicit diagnostics for removed properties.
 
 ## API Checks
 
@@ -106,7 +108,7 @@ new ApiCheck('authenticated-api-check', {
     assertions: [
       AssertionBuilder.statusCode().equals(200),
       AssertionBuilder.jsonBody('$.user.id').isNotNull(),
-      AssertionBuilder.jsonBody('$.user.email').matches(/^.+@.+\..+$/),
+      AssertionBuilder.jsonBody('$.user.email').contains('@'),
     ],
   },
   environmentVariables: [
@@ -133,7 +135,7 @@ new ApiCheck('create-user-api', {
     assertions: [
       AssertionBuilder.statusCode().equals(201),
       AssertionBuilder.jsonBody('$.id').isNotNull(),
-      AssertionBuilder.header('Location').matches(/\/users\/\d+/),
+      AssertionBuilder.headers('Location', '(/users/[0-9]+)').notEmpty(),
     ],
   },
 })
@@ -155,11 +157,11 @@ new ApiCheck('advanced-assertions', {
       AssertionBuilder.responseTime().lessThan(1000),
       
       // Headers
-      AssertionBuilder.header('Content-Type').contains('application/json'),
-      AssertionBuilder.header('X-RateLimit-Remaining').greaterThan(0),
+      AssertionBuilder.headers('Content-Type').contains('application/json'),
+      AssertionBuilder.headers('X-RateLimit-Remaining').greaterThan(0),
       
       // JSON body (JSONPath)
-      AssertionBuilder.jsonBody('$.products').isArray(),
+      AssertionBuilder.jsonBody('$.products[0].id').isNotNull(),
       AssertionBuilder.jsonBody('$.products.length').greaterThan(0),
       AssertionBuilder.jsonBody('$.products[0].name').isNotNull(),
       AssertionBuilder.jsonBody('$.products[*].price').greaterThan(0),
@@ -211,7 +213,7 @@ new ApiCheck('with-setup-teardown', {
       AssertionBuilder.statusCode().equals(200),
     ],
   },
-  teardownScript: {
+  tearDownScript: {
     content: `
       // Teardown: Log result
       console.log('Check completed:', response.status)
@@ -323,35 +325,30 @@ new BrowserCheck('homepage-browser-check', {
 
 ## Multi-Step Checks
 
-Complex browser workflows (legacy, prefer Browser Checks).
+Sequential API workflows use Playwright's request fixture. Use a Browser Check when the workflow needs a browser page.
 
 ```typescript
 // __checks__/multi-step.check.ts
 import { MultiStepCheck } from 'checkly/constructs'
 
 new MultiStepCheck('multi-step-check', {
-  name: 'Multi-Step Flow',
-  code: {
-    entrypoint: './multi-step-script.js',
-  },
+  name: 'Multi-Step API Flow',
+  locations: ['us-east-1'],
+  code: { entrypoint: './multi-step.spec.ts' },
   runtimeId: '2025.04',
 })
+```
 
-// multi-step-script.js
-const { chromium } = require('playwright')
+```typescript
+// __checks__/multi-step.spec.ts
+import { test, expect } from '@playwright/test'
 
-async function run() {
-  const browser = await chromium.launch()
-  const page = await browser.newPage()
-  
-  await page.goto('https://example.com')
-  await page.click('text=Login')
-  // ... more steps
-  
-  await browser.close()
-}
-
-run()
+test('API status and catalog', async ({ request }) => {
+  const health = await request.get('https://api.example.com/status')
+  expect(health.ok()).toBeTruthy()
+  const catalog = await request.get('https://api.example.com/products')
+  expect(catalog.ok()).toBeTruthy()
+})
 ```
 
 ## Check configuration
@@ -439,7 +436,7 @@ new ApiCheck('check-with-retries', {
   name: 'Check with Retries',
   retryStrategy: RetryStrategyBuilder.fixedStrategy({
     baseBackoffSeconds: 60,
-    maxAttempts: 2,
+    maxRetries: 2,
     maxDurationSeconds: 600,
     sameRegion: true,
   }),
@@ -587,13 +584,13 @@ npx checkly api /v1/checks/<check-id>
 npx checkly alert-channels list --output json --limit 100
 ```
 
-If a selected check has `groupId`, fetch groups once and locate the matching group:
+If the raw REST check payload has a non-null `groupId`, fetch groups once and match that ID:
 
 ```bash
 npx checkly api /v1/check-groups
 ```
 
-Analyze only confirmed fields: `activated`, `muted`, `groupId`, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `retryStrategy`, and `doubleCheck`. For channels, explain whether subscriptions are check-local, group-scoped, active, inactive, or unrelated. Do not use write methods, trigger checks, mutate incidents, or probe guessed account/global alerting endpoints. If output only shows `useGlobalAlertSettings: true`, report that global alert settings are selected but their policy details were not available in the inspected CLI/API output.
+Analyze only fields actually returned: `activated`, `muted`, `groupId`, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `doubleCheck`, and `retryStrategy`. These are REST payload fields, not construct properties: `groupId` and the legacy `doubleCheck` remain API fields even though authoring those properties on constructs is rejected. Inspect both retry fields on existing checks; do not infer that the legacy toggle is absent or disabled merely because it was removed from construct inputs. For channels, explain whether subscriptions are check-local, group-scoped, active, inactive, or unrelated. Do not use write methods, trigger checks, mutate incidents, or probe guessed account/global alerting endpoints. If output only shows `useGlobalAlertSettings: true`, report that global alert settings are selected but their policy details were not available in the inspected CLI/API output.
 
 ### Drill into a result or error group
 

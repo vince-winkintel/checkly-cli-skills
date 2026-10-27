@@ -9,6 +9,8 @@ Advanced Checkly CLI features and patterns.
 
 ## Retry Strategies
 
+API/browser/multistep checks and `CheckGroupV1` default to one immediate retry in another region. Monitors and Playwright suites default to no CLI retries. Use `RetryStrategyBuilder.singleRetry({ baseBackoffSeconds: 0, sameRegion: false })` for the immediate cross-region behavior or `RetryStrategyBuilder.noRetries()` to disable it. Bare `singleRetry()` waits 60 seconds in the same region.
+
 ### Fixed retry
 
 ```typescript
@@ -16,7 +18,7 @@ import { RetryStrategyBuilder } from 'checkly/constructs'
 
 retryStrategy: RetryStrategyBuilder.fixedStrategy({
   baseBackoffSeconds: 60,
-  maxAttempts: 2,
+  maxRetries: 2,
   maxDurationSeconds: 600,
   sameRegion: true,
 })
@@ -27,7 +29,7 @@ retryStrategy: RetryStrategyBuilder.fixedStrategy({
 ```typescript
 retryStrategy: RetryStrategyBuilder.linearStrategy({
   baseBackoffSeconds: 30,
-  maxAttempts: 3,
+  maxRetries: 3,
   maxDurationSeconds: 600,
   sameRegion: false,
 })
@@ -38,8 +40,8 @@ retryStrategy: RetryStrategyBuilder.linearStrategy({
 ```typescript
 retryStrategy: RetryStrategyBuilder.exponentialStrategy({
   baseBackoffSeconds: 10,
-  maxAttempts: 5,
-  maxDurationSeconds: 1800,
+  maxRetries: 5,
+  maxDurationSeconds: 600,
   sameRegion: true,
 })
 ```
@@ -49,14 +51,16 @@ retryStrategy: RetryStrategyBuilder.exponentialStrategy({
 ```typescript
 // Retry only on network errors (API checks only)
 retryStrategy: RetryStrategyBuilder.fixedStrategy({
-  maxAttempts: 2,
+  maxRetries: 2,
   onlyOn: 'NETWORK_ERROR',
 })
 ```
 
 ## Reporters
 
-### List reporter (default)
+With no explicit reporter, CI and agents use `ci`, other runs use `list`. Results go to stdout, diagnostics to stderr. Timed-out checks produce `Timed out` in JSON / `T` in dot output and exit 1. `--max-failures` on test/trigger reports unfinished checks separately; see `checkly-test`.
+
+### List reporter (default outside CI and agent mode)
 
 ```bash
 npx checkly test --reporter=list

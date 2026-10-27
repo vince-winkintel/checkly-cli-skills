@@ -32,13 +32,34 @@ npx checkly test-sessions get <session-id> --error-group <error-group-id> --full
 
 ## How it works
 
-`npx checkly test` executes your checks in Checkly's runtime environment (same as production) but does NOT deploy or schedule them. Perfect for:
+`npx checkly test` executes your checks in Checkly's runtime environment (same as production) without deploying persistent resources or changing recurring schedules. Perfect for:
 - ✅ Pre-deployment validation
 - ✅ CI/CD integration
 - ✅ Local development iteration
 - ✅ Debugging check failures
 
 The CLI dispatches test sessions through Checkly's asynchronous scheduling API and watches scheduling before collecting results. Scheduling failures now fail fast with the server error instead of waiting for the per-check timeout. With `--detach`, the CLI confirms scheduling reached a terminal state before exiting, so dispatch failures still return non-zero.
+
+## Empty selections, timeouts and early stopping
+
+`test` exits 1 if no checks match a file filter, `--grep` or `--tags`. Use `--list` to inspect the selection (exit 0), or `--no-fail-on-no-matching` only when an empty selection is intentional. `pw-test` also exits 1 for no checks; it has no matching opt-out flag. A passing empty selection must not stand in for a test gate.
+
+```bash
+npx checkly test --list
+npx checkly test --tags smoke --max-failures=2
+npx checkly trigger --max-failures=2
+# Only for workflows where zero matches are intentionally acceptable
+npx checkly test --grep optional --no-fail-on-no-matching
+```
+
+`--max-failures=<n>` on `test` and `trigger`, or `cli.maxFailures`, stops waiting once n checks have final failures, writes reports, requests best-effort session cancellation and exits 1. The limit must be an integer of at least 1; omit the setting for no limit. A successful retry does not count as a failure. Unfinished checks report `Not finished`; JSON includes `stoppedEarly`. Some checks may still execute remotely. The flag cannot combine with `--detach`, or with `test --update-snapshots`. A configured `cli.maxFailures` is ignored for detached runs and ignored with a notice for snapshot updates.
+
+For `test`, `trigger` and `pw-test`, `--timeout` measures run time from each check's start and restarts on retries. Scheduling delay is excluded; a check that never starts times out after the configured timeout plus 900 seconds. CLI-side timeouts mean the CLI stopped waiting, not necessarily that the remote check stopped.
+
+Timed-out results use `result: "Timed out"` in JSON, `T` in dot output, and a timeout marker/count in list/CI/GitHub reporters; exit remains 1. Match both `Fail` and `Timed out` if parsing result strings, or use exit status. Reporters show retry counts and count recovered checks as both passed and flaky. The CLI guards against duplicate results at timeout boundaries and retries failed result-stream connections. Cancellation failure no longer crashes Ctrl+C handling; a second Ctrl+C yields shell status 130.
+
+Stdout contains results and summaries. Progress, warnings and errors go to stderr. Default reporter is `ci` in CI and agent mode, `list` otherwise; an explicit flag/config overrides it. Set `CI=false` (or `0`, `no`, `off`) to disable CI detection even on provider hosts. Avoid pinning `reporters: ['list']` in general-purpose configs if automatic selection is desired.
+
 
 ## Command reference
 
@@ -59,6 +80,11 @@ npx checkly test [file-pattern] [options]
 | `--refresh-cache` | Force a one-off dependency reinstall for this run |
 | `--env-file=<path>` | Load environment variables from file |
 | `--grep=<pattern>` | Filter checks by name pattern |
+| `--tags=<tags>` | Filter by tags |
+| `--list` | List matching checks without running them |
+| `--no-fail-on-no-matching` | Accept an intentionally empty test selection |
+| `--max-failures=<n>` | Stop after n final failures (integer >= 1) |
+| `--timeout=<seconds>` | Per-check running timeout; scheduling delay excluded |
 
 ## Recorded test sessions
 
@@ -225,7 +251,7 @@ API_KEY=test-key-123
 
 ## Reporters
 
-### List reporter (default)
+### List reporter (default outside CI and agent mode)
 
 ```bash
 npx checkly test --reporter=list
@@ -238,7 +264,7 @@ npx checkly test --reporter=list
 ```bash
 npx checkly test --reporter=dot
 
-# Compact: . = pass, F = fail
+# Compact: . = pass, F = fail, T = timed out
 ```
 
 ### CI reporter
@@ -366,7 +392,7 @@ npx checkly test --retries=2
 # Or configure in checkly.config.ts:
 checks: {
   retryStrategy: RetryStrategyBuilder.fixedStrategy({
-    maxAttempts: 2,
+    maxRetries: 2,
     baseBackoffSeconds: 60,
   }),
 }

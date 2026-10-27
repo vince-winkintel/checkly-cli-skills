@@ -8,12 +8,15 @@
 - **License**: MIT
 - **Status**: Created and pushed successfully
 
-### 2. Skill Structure (12 Total SKILL.md Files)
+### 2. Skill Structure (15 Total SKILL.md Files)
 
 **Main Skill:**
-- `SKILL.md` - Comprehensive overview with routing to sub-skills
+- `checkly-cli-skills/SKILL.md` - Comprehensive overview with routing to sub-skills
 
-**Sub-Skills (11):**
+**Sub-Skills (14):**
+- `checkly-assets` - Result asset inspection and downloads
+- `checkly-members` - Account membership
+- `checkly-usage` - Account plans and usage reports
 - `checkly-auth` - Authentication and login workflows
 - `checkly-config` - Configuration files and project setup
 - `checkly-test` - Local testing with npx checkly test
@@ -38,7 +41,7 @@
 
 ### 4. Scripts (4 Files)
 - `init-project.sh` - Initialize new Checkly monitoring project
-- `test-and-deploy.sh` - Test locally before deploying
+- `test-and-deploy.sh` - No-argument default-project test-and-review entry; run approved confirmation commands or custom-config workflows directly with Checkly
 - `import-from-ui.sh` - Import existing checks from Checkly UI
 - `validate-config.sh` - Validate project configuration
 
@@ -146,7 +149,7 @@ Based on comprehensive research from:
 ## 📦 Repository Statistics
 
 - **Total Files**: 30
-- **SKILL.md Files**: 12 (1 main + 11 sub-skills)
+- **SKILL.md Files**: 15 (1 main + 14 sub-skills)
 - **Templates**: 8
 - **Scripts**: 4
 - **References**: 2
@@ -160,7 +163,7 @@ Based on comprehensive research from:
 1. **Verify Repository**: https://github.com/vince-winkintel/checkly-cli-skills
 2. **Test Skills**: Use ClawHub CLI to test skill loading
 3. **Publish to ClawHub**: Follow ClawHub publication workflow
-4. **Set Version**: v1.0.0 (production-ready)
+4. **Set Version**: Read the current package version from `VERSION`
 5. **Announce**: Share with Checkly community if desired
 
 ## ✨ Ready for Production
@@ -180,4 +183,4 @@ This skill is **production-ready** and follows all ClawHub best practices:
 
 ## 🎉 Project Complete!
 
-The checkly-cli-skills project is ready for v1.0.0 publication to ClawHub.
+The checkly-cli-skills project is versioned through `VERSION`; publication is a separate release step.

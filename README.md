@@ -71,7 +71,7 @@ The [`templates/`](./templates) directory includes ready-to-use templates:
 The [`scripts/`](./scripts) directory provides automation helpers:
 
 - `init-project.sh` - Initialize new Checkly project
-- `test-and-deploy.sh` - Test locally before deploying
+- `test-and-deploy.sh` - No-argument default-project test-and-review entry; run approved confirmation commands or custom-config workflows directly with Checkly
 - `import-from-ui.sh` - Import existing checks from UI
 - `validate-config.sh` - Validate project configuration
 
