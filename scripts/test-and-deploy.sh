@@ -1,25 +1,18 @@
 #!/bin/bash
-# Test checks locally before deploying to production
+# Test project definitions, then let Checkly present and confirm its deploy plan.
+# Exit 3 means confirmation is required in CI/agent mode; 2 means invalid input.
 
 set -e
 
-echo "🧪 Testing checks locally..."
-npx checkly test
-
-if [ $? -eq 0 ]; then
-  echo "✅ All checks passed!"
-  echo ""
-  read -p "Deploy to production? (y/N) " -n 1 -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "🚀 Deploying checks..."
-    npx checkly deploy --force
-    echo "✅ Deployment complete!"
-  else
-    echo "❌ Deployment cancelled"
-    exit 1
-  fi
+echo "Testing checks in the Checkly runtime..." >&2
+if npx checkly test; then
+  echo "Checks passed. Reviewing the deployment plan..." >&2
 else
-  echo "❌ Some checks failed. Fix issues before deploying."
-  exit 1
+  status=$?
+  echo "Checks did not pass; nothing was deployed." >&2
+  exit "$status"
 fi
+
+# Preserve upstream stdout and status, including confirmation_required / exit 3.
+# The CLI owns confirmation so the user approves the actual plan.
+npx checkly deploy

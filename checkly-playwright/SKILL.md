@@ -57,7 +57,7 @@ new PlaywrightCheck('critical-browser-journey', {
 })
 ```
 
-The shorthand `checks.playwrightChecks` entries do not expose `intent`; use an explicit `PlaywrightCheck` construct when intent is required. Intent does not replace Playwright assertions. Omit it to preserve existing backend-authored intent, provide an object to set/update it, or use `intent: null` to clear it deliberately. A goal is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
+The shorthand `checks.playwrightChecks` entries do not expose `intent`; use an explicit `PlaywrightCheck` construct when intent is required. Intent does not replace Playwright assertions. Omit it to clear existing intent on deployment, provide an object to set/update it, or use `intent: null` to clear it deliberately. A goal is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
 
 ## Playwright configuration
 
@@ -81,6 +81,15 @@ export default defineConfig({
 When an explicit `engine` is omitted from a `PlaywrightCheck`, the CLI resolves Node and Bun candidates separately. It reads `.node-version`, `.nvmrc`, `.tool-versions`, `.bun-version`, and `package.json` `engines` only from the project root (`Session.basePath`); member-level copies beside a nested Checkly config are ignored. Only Volta lookup starts at the package containing the Checkly config. A Node candidate always wins over a Bun candidate, so `.bun-version` or `engines.bun` selects Bun only when no Node source resolves. Among Node sources, `.node-version`, `.nvmrc`, and the `nodejs` entry in `.tool-versions` override Volta, which overrides `engines.node`.
 
 For Volta, the CLI walks from the config package toward the project root and stops at the nearest `package.json` with a `volta` object, even if that object and its `volta.extends` chain provide no `node` pin; a member-level block that only pins a package manager therefore hides a root Volta Node pin. A valid semver range in `volta.node` or `engines.node` resolves to its minimum major (`>=22` selects Node 22). Non-semver values fall through, as do `.nvmrc` aliases `lts/*`, `lts`, `node`, `stable`, and `latest`. Volta does not select Bun. For an explicit override, import `Engine` from `checkly/constructs` and set `engine: Engine.node(...)` or `Engine.bun(...)` when repository metadata is ambiguous or the Checkly runtime must intentionally differ from local tooling.
+
+### Bun engines and grouping
+
+Use `Engine.bun('1.4')` to select Bun 1.4, or `Engine.bun('1')` for the latest available Bun 1.x. An auto-detected Bun 1.4.x pin resolves to 1.4; a pin of 1.5 or later currently resolves to 1.4 with a notice. The host CLI still requires Node.js 22.13.0 or later.
+
+Assign suites with `group: myGroup` on `PlaywrightCheck` or a `playwrightChecks` entry. Use a config-declared `CheckGroupV2` or `CheckGroupV2.fromId()` for an existing group. Removing the group property also removes the deployed association. See `checkly-constructs` for migration warnings.
+
+`npx checkly pw-test` exits 1 when no checks match. Its `--timeout` starts when a check actually runs (with an additional 900-second wait limit for one that never starts); see `checkly-test` for result statuses and reporting.
+
 
 ## Multiple projects
 
@@ -206,7 +215,7 @@ export default defineConfig({
 })
 ```
 
-Do not place cache configuration on an individual suite or check: one uploaded code bundle serves all Playwright Check Suites. Unset and empty-string versions leave the key unchanged. The deprecated `caching.dependencyCache.version` alias still works with a warning; upgrade every CLI environment before migrating, then remove the old property because declaring it together with `runner.cache.install.version` fails config loading. For a one-off reinstall during an ad-hoc run, use `--refresh-cache` on `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead.
+Do not place cache configuration on an individual suite or check: one uploaded code bundle serves all Playwright Check Suites. Unset and empty-string versions leave the key unchanged. Migration warning: `caching` is removed. Replace `caching.dependencyCache.version` with `runner.cache.install.version` and ensure all CLI environments support that setting. For a one-off reinstall during an ad-hoc run, use `--refresh-cache` on `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead.
 
 ## Related Skills
 

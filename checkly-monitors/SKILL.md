@@ -46,7 +46,7 @@ new UrlMonitor('dashboard-url', {
 })
 ```
 
-Intent supplements executable monitor assertions; it does not replace them. Omit the property to preserve existing backend-authored intent, provide an object to set/update it, or use `intent: null` to clear it deliberately. `goal` is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
+Intent supplements executable monitor assertions; it does not replace them. Omit the property to clear existing intent on deployment, provide an object to set/update it, or use `intent: null` to clear it deliberately. `goal` is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
 
 ## Heartbeat monitors
 
@@ -60,6 +60,7 @@ new HeartbeatMonitor('app-heartbeat', {
   period: 300,
   periodUnit: 'seconds',
   grace: 60,
+  graceUnit: 'seconds',
 })
 ```
 
@@ -78,8 +79,7 @@ import { TcpMonitor } from 'checkly/constructs'
 
 new TcpMonitor('database-tcp', {
   name: 'Database TCP Check',
-  host: 'db.example.com',
-  port: 5432,
+  request: { hostname: 'db.example.com', port: 5432 },
   frequency: 5,
 })
 ```
@@ -89,13 +89,15 @@ new TcpMonitor('database-tcp', {
 Validate DNS records.
 
 ```typescript
-import { DnsMonitor } from 'checkly/constructs'
+import { DnsMonitor, DnsAssertionBuilder } from 'checkly/constructs'
 
 new DnsMonitor('dns-check', {
   name: 'DNS A Record',
-  host: 'example.com',
-  recordType: 'A',
-  expectedValues: ['93.184.216.34'],
+  request: {
+    query: 'example.com',
+    recordType: 'A',
+    assertions: [DnsAssertionBuilder.jsonAnswer('$.Answer[0].data').equals('93.184.216.34')],
+  },
 })
 ```
 
@@ -104,9 +106,11 @@ Use `recordType: 'HTTPS'` when validating HTTPS/SVCB-style service-binding recor
 ```typescript
 new DnsMonitor('https-dns-check', {
   name: 'DNS HTTPS Record',
-  host: 'example.com',
-  recordType: 'HTTPS',
-  expectedValues: ['1 . alpn="h2,h3"'],
+  request: {
+    query: 'example.com',
+    recordType: 'HTTPS',
+    assertions: [DnsAssertionBuilder.textAnswer().contains('alpn')],
+  },
 })
 ```
 
@@ -154,7 +158,7 @@ new GrpcMonitor('grpc-health', {
 ```
 
 - In `HEALTH` mode, optionally set `grpcConfig.service`; omit it to query overall server health.
-- In `BEHAVIOR` mode, set `grpcConfig.method` and use `serviceDefinition: 'REFLECTION'` or `'PROTO_FILE'`.
+- In protobuf `BEHAVIOR` mode, set `grpcConfig.method` and use `serviceDefinition: 'REFLECTION'` or `'PROTO_FILE'`. For FlatBuffers, use `encoding: 'FLATBUFFERS'` and base64-encoded compiled schema `bfbsContent`; omit `serviceDefinition` and `protoContent`. FlatBuffers is not allowed in `HEALTH` mode.
 - `healthCheckStatus().equals()` and `.notEquals()` accept `UNKNOWN`, `SERVING`, `NOT_SERVING`, or `SERVICE_UNKNOWN` (or raw enum values `0`-`3`). Use the builder: it emits the numeric wire target required by the runner.
 - In `BEHAVIOR` mode, use `responseMessage('$.path')`, `textBody()`, or `responseMetadata('header-name')` assertions as appropriate.
 - Do not add `storeResponseBody` to the request; it is no longer part of `GrpcRequest`.
@@ -199,7 +203,7 @@ new SslMonitor('tls-certificate', {
 - Response-time thresholds are top-level monitor properties and measure TLS handshake time.
 - Put certificate settings under `request.sslConfig`.
 - For mutual TLS, set `clientCertificateMode: 'explicit'` and `sslClientCertificateId` under `sslConfig`; never embed certificate secrets in a check file.
-- SSL assertions are property-scoped. Use `certificate('<property>')` for certificate facts and `connection('<property>')` for connection and handshake facts; the pre-8.17 source-specific builders such as `certExpiresInDays()` and `tlsVersion()` are obsolete.
+- SSL assertions are property-scoped. Use `certificate('<property>')` for certificate facts and `connection('<property>')` for connection and handshake facts; migration warning: source-specific builders such as `certExpiresInDays()` and `tlsVersion()` are obsolete.
 - Certificate properties include `daysUntilExpiry`, `keySizeBits`, `subjectCN`, `issuerCN`, `serialNumber`, `fingerprintSha256`, `issuerFingerprintSha256`, `keyAlgorithm`, `signatureAlgorithm`, `sans`, `selfSigned`, and `isCA`.
 - Connection properties include `tlsVersion`, `cipherSuite`, `hostnameVerified`, `chainTrusted`, `ocspStapled`, `ocspStatus`, and `resolvedIp`.
 - The supported operator depends on the property. Numeric properties support equality and greater/less-than comparisons; booleans support `equals`; strings generally support equality and, where applicable, `contains`/`notContains`.

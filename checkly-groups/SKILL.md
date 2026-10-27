@@ -39,6 +39,12 @@ new ApiCheck('status-check', {
 })
 ```
 
+## Suite grouping and defaults
+
+Use `group` for check membership, including Playwright suites. A `playwrightChecks` config entry can refer to a config-declared `CheckGroupV2` or `CheckGroupV2.fromId()`. Removing a suite's group also removes its deployed membership. Migration warning: `groupId` and `groupName` are removed construct/config properties.
+
+For `CheckGroupV1` (also exported as `CheckGroup`), omitted retry strategy resolves to one immediate retry in another region. Declare `RetryStrategyBuilder.noRetries()` when no retries are intended. Migration warning: `doubleCheck` is removed. Group local-script properties remain supported; the removed local-script properties on `ApiCheck` must migrate to `setupScript` and `tearDownScript`.
+
 ## Hierarchical configuration
 
 Group settings override global defaults:

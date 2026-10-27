@@ -5,243 +5,122 @@ description: Inspect Checkly account plans, entitlements, feature limits, organi
 
 # Checkly account plan and usage
 
-Use the read-only `npx checkly account` commands for two different questions:
-
-- `account plan` reports the active account's plan, add-ons, entitlements, and feature limits. Use it for questions such as whether private locations or another feature is enabled.
-- `account usage` reports organization contract terms, credit consumption, projections, and grouped usage series. It requires an account covered by usage terms; do not substitute it for plan or entitlement checks.
-
-## Preconditions
-
-```bash
-npx checkly whoami
-```
-
-Confirm the active account before interpreting either account-level result. `whoami` prints the account, user, plan, and add-ons, but not the user's role. Usage reporting requires a current user or service API key and an Owner or Admin role; legacy account API keys are not accepted. If authentication is unclear, follow `checkly-auth` without printing credential values.
+Use `account plan` for account entitlements and limits. Use `account usage` for organization contract terms, measured credit use and projections. Confirm the effective account with `npx checkly whoami --output json` before interpreting results. Usage requires a current user/service credential with `usage:read` permission; legacy account keys are not accepted.
 
 ## Command map
 
-| Command | Purpose | Exact output formats |
+| Command | Purpose | Default output |
 |---|---|---|
-| `npx checkly account plan` | Show the plan and feature entitlements, or inspect one entitlement key | <code>[-o table&#124;json&#124;md]</code> (`table` default) |
-| `npx checkly account usage terms` | Show contract dates, usage start date, credit budget/rates, and covered accounts | <code>[-o detail&#124;json&#124;md]</code> (`detail` default) |
-| `npx checkly account usage summary` | Show totals for a date range and credit projections as of today | <code>[-o detail&#124;json&#124;md]</code> (`detail` default) |
-| `npx checkly account usage series` | Show per-period usage grouped by account and/or check type | <code>[-o table&#124;json&#124;md]</code> (`table` default) |
+| `account plan [KEY]` | Plan, add-ons, entitlements and location limits | `table` |
+| `account usage terms` | Paginated list of terms, optionally overlapping dates | `table` |
+| `account usage term <id>` | One term UUID, pricing rules and covered accounts | `detail` |
+| `account usage summary` | Credit totals, pricing breakdowns and coverage gaps | `detail` |
+| `account usage series` | Per-period rows with composable dimensions | `table` |
+| `account usage projections <id>` | Project credit consumption for one term UUID | `detail` |
 
-`terms` and `summary` do not accept `table`; `series` does not accept `detail`.
+All accept `--output json` or `--output md`; table-default commands also accept `table`, detail-default commands accept `detail`. Results go to stdout and diagnostic errors to stderr. Invalid inputs exit 2; runtime failures exit 1.
 
-## Account plan and entitlements
+## Account plan
 
 ```bash
-# Plan, add-ons, location availability, and all entitlements
 npx checkly account plan --output json
-
-# Search entitlement names and descriptions
-npx checkly account plan --search "browser" --output json
-
-# Inspect one entitlement by its exact key
+npx checkly account plan --search browser --output json
 npx checkly account plan <ENTITLEMENT_KEY> --output json
-
-# Show features not included in the active plan
 npx checkly account plan --disabled --output table
 ```
 
-- `--type` accepts `metered` or `flag`.
-- A positional entitlement `KEY` cannot be combined with `--type`, `--search`, or `--disabled`.
-- Unfiltered JSON is a plan object with `plan`, `planDisplayName`, `addons`, optional `locations`, and `entitlements[]`. Inspect `locations.all[].available` and `locations.maxPerCheck` for public-location availability and per-check limits.
-- Filtered JSON is an entitlement array; a `KEY` lookup returns one entitlement object. Filters do not include the surrounding plan or location fields.
-- Use plan output for feature availability and limits. Use usage output only for contract-credit accounting.
+`--type` accepts `metered` or `flag`. A positional key cannot be combined with `--type`, `--search` or `--disabled`. An unknown key exits 1. Unfiltered JSON has `plan`, `planDisplayName`, `addons`, optional `locations`, and `entitlements[]`. Filtered JSON is an entitlement array; a key lookup returns one object. Inspect `locations.all[].available` and `locations.maxPerCheck` for location limits.
 
-## Usage date resolution
-
-`--to` defaults to today, selects the usage terms covering that date, and is the inclusive end date for `terms`, `summary`, and `series`. For `summary` and `series`, `--from` defaults to the selected terms' `usageStartDate`.
-
-Pin both dates explicitly whenever you paginate, compare `summary` with `series`, or collect results across commands or sessions. The usage API binds a series cursor to every resolved query parameter; relying on a moving default date can invalidate the next page.
-
-## Recommended usage review workflow
-
-First resolve one contract and choose the intended range. Unless a narrower range is required, copy `terms.usageStartDate` into `FROM` and use the same explicit `TO` for all commands.
+## Select terms and dates
 
 ```bash
-TO=2026-03-31
-FROM=2026-01-01
-
-# 1. Resolve the contract that covers TO
-npx checkly account usage terms \
-  --to "$TO" \
-  --output json
-
-# 2. Review totals and projections for the pinned range
-npx checkly account usage summary \
-  --from "$FROM" \
-  --to "$TO" \
-  --output json
-
-# 3. Break consumption down using the same range
-npx checkly account usage series \
-  --from "$FROM" \
-  --to "$TO" \
-  --interval month \
-  --group-by account,checkType \
-  --limit 100 \
-  --output json
+npx checkly account usage terms --from 2026-01-01 --to 2026-03-31 --output json
+npx checkly account usage term <term-uuid> --output json
+npx checkly account usage summary --from 2026-01-01 --to 2026-03-31 --usage-terms-id <term-uuid> --output json
+npx checkly account usage series --from 2026-01-01 --to 2026-03-31 --group-by account,checkType --include runs --output json
+npx checkly account usage projections <term-uuid> --as-of 2026-03-31 --output json
 ```
 
-Report the contract period and credit budget before consumption percentages or projections. Distinguish measured usage from projections, which are calculated as of today.
+Dates are inclusive UTC `YYYY-MM-DD` calendar dates, with `from <= to`. For `terms`, neither date has a default: the range selects **all overlapping terms**, not one contract covering the end date. For `summary`/`series`, `--to` defaults to today and `--from` to the earliest selected usage start, or the end date. Pin both dates for comparisons and pagination.
 
-## JSON response shapes
+`projections --as-of` defaults to **yesterday UTC**. Today and future dates are rejected: projections use a completed UTC day. Report the selected term and as-of date alongside any estimate; do not describe a projection as measured usage.
 
-The JSON views are not interchangeable. Abbreviated shapes:
+## Range and series flags
+
+`summary` and `series` accept repeated or comma-separated `--usage-terms-id` UUIDs, `--account-id` GUIDs and `--pricing-rule` keys (up to 100 values per list). `--account-id` filters covered accounts; it does not switch authentication. Set `CHECKLY_ACCOUNT_ID` before launching the CLI to select the authenticated account.
+
+Pricing keys: `apiChecks`, `multistepChecks`, `browserChecks`, `playwrightCheckSuites`, `uptimeMonitors`, `aiInvocations`, `statusPages`, `statusPageAdditionalServices`, `statusPageAdditionalSubscribers`, `additionalSms`, `additionalPhoneAlerts`.
+
+Migration warning: `--check-type` was removed and is rejected. Select charges with `--pricing-rule`, or break them down with `series --group-by checkType`.
+
+| Series flag | Values |
+|---|---|
+| `--interval` | `total`, `day` (default), `week`, `month` |
+| `--group-by` | Comma-separated `account`, `usageTerm`, `pricingRule`, `checkType`; `none` for no grouping. Default `account,checkType`. |
+| `--include` | `runs`, `calculations`, or both; repeat or comma-separate. |
+| `--limit`, `-l` | 1–500, default 100; also on `terms`. |
+| `--cursor` | Nonempty next-page cursor; also on `terms`. |
+
+Continue only when `pagination.nextId` is non-null. Reuse effective dates and every selection, grouping, include, interval and limit from page one (or the printed continuation command). Do not pass the string `null` as a cursor.
+
+## JSON contract
+
+These are abbreviated structural examples, not captured responses:
 
 ```jsonc
-// account usage terms --output json
-{
-  "id": "usage-terms-id",
-  "name": "Organization name",
-  "accounts": [{ "id": "account-id", "name": "Account name" }],
-  "contractStartDate": "YYYY-MM-DD",
-  "contractEndDate": "YYYY-MM-DD",
-  "usageStartDate": "YYYY-MM-DD",
-  "creditBudget": 100000,
-  "standardCreditsPerUnit": 1,
-  "premiumCreditsPerUnit": 2
-}
-
-// account usage summary --output json
-{
-  "usageTermsId": "usage-terms-id",
-  "period": { "from": "YYYY-MM-DD", "to": "YYYY-MM-DD" },
-  "totals": {
-    "credits": { "used": 123, "percentOfBudget": 12.3 },
-    "meters": [
-      { "meterType": "CHECK_RUN", "measures": { "...": "..." } },
-      { "meterType": "AI_INVOCATION", "measures": { "...": "..." } }
-    ]
-  },
-  "projections": {
-    "weeksSinceStart": 4,
-    "weeksRemaining": 48,
-    "remainingCredits": 99877,
-    "windows": {
-      "sinceStart": {
-        "usage": { "credits": {}, "meters": [] },
-        "projectedAnnualPercentOfBudget": 10,
-        "projectedCreditsAtContractEnd": 10000,
-        "projectedPercentAtContractEnd": 10,
-        "projectedWeeksUntilExhausted": null
-      },
-      "last30Days": {},
-      "last7Days": {},
-      "last1Day": {}
-    }
-  }
-}
-
-// account usage series --output json
+// terms: list wrapper; term <id>: one object from data
 {
   "data": [{
-    "periodStart": "YYYY-MM-DD",
-    "periodEnd": "YYYY-MM-DD",
-    "accountId": "account-id",
-    "checkType": "API",
-    "credits": { "used": 12, "percentOfBudget": 1.2 },
-    "meters": [{ "meterType": "CHECK_RUN", "measures": { "...": "..." } }]
+    "id": "term-uuid", "name": "Organization",
+    "accounts": [{ "id": "account-guid", "name": "Account" }],
+    "contractStartDate": "2026-01-01", "contractEndDate": "2026-12-31",
+    "usageStartDate": "2026-01-01", "creditBudget": 100000,
+    "standardCreditsPerUnit": 1, "premiumCreditsPerUnit": 2,
+    "packageModel": "credits", "pricingRules": {}
+  }],
+  "pagination": { "nextId": null, "length": 1 }
+}
+// summary
+{
+  "period": { "from": "2026-01-01", "to": "2026-03-31" },
+  "usageTermsIds": ["term-uuid"],
+  "totals": { "creditsUsed": 123 },
+  "breakdown": [],
+  "coverage": { "gaps": [] }
+}
+// series
+{
+  "data": [{
+    "periodStart": "2026-01-01", "periodEnd": "2026-01-01",
+    "dimensions": { "accountId": "account-guid", "checkType": "API" },
+    "creditsUsed": 12, "contributions": []
   }],
   "pagination": { "nextId": null, "length": 1 },
-  "usageTermsId": "usage-terms-id",
-  "period": {
-    "from": "YYYY-MM-DD",
-    "to": "YYYY-MM-DD",
-    "interval": "month",
-    "groupBy": "account,checkType"
-  },
-  "warnings": [{ "code": "PARTIAL_WINDOW", "message": "..." }]
+  "period": { "from": "2026-01-01", "to": "2026-03-31" },
+  "usageTermsIds": ["term-uuid"],
+  "interval": "day", "groupBy": ["account", "checkType"],
+  "coverage": { "gaps": [] }
 }
 ```
 
-- `summary` JSON has no organization name, contract dates, or credit budget. Join `summary.usageTermsId` to `terms.id` for those fields.
-- Select meter entries by the `meterType` discriminator (`CHECK_RUN` or `AI_INVOCATION`), never by array position.
-- Nullable values include terms credit budget/rates, `credits.used`, `credits.percentOfBudget`, `projections.remainingCredits`, and projected window values such as `projectedWeeksUntilExhausted`. Treat `null` as unknown, not zero.
-- Only `series` carries warnings. JSON returns `warnings: [{code, message}]`, while table/Markdown views print each warning message with its literal code. Preserve `PARTIAL_WINDOW`, `USAGE_TERMS_FLAGGED`, and `UNKNOWN_BUDGET`; `terms` and `summary` carry none.
-
-## Terms and historical contracts
-
-An explicit `--to YYYY-MM-DD` selects the usage terms covering that inclusive date; it does not name a usage-terms ID.
-
-```bash
-npx checkly account usage terms --to 2026-03-31 --output json
-```
-
-Interpret `NO_USAGE_TERMS` based on how the command was called:
-
-- With explicit `--to`: that date is outside the account's known terms. Omit `--to` once to inspect current contract dates when available, then choose a covered date. Do not infer that the organization has never had a contract from one uncovered historical date.
-- Without explicit `--to`: no current terms cover the active account. Stop probing arbitrary dates and use `npx checkly account plan` for plan or entitlement questions.
-
-## Summary filters
-
-```bash
-npx checkly account usage summary \
-  --from 2026-01-01 \
-  --to 2026-01-31 \
-  --account-id <account-id> \
-  --check-type API \
-  --output json
-```
-
-- Dates are inclusive and must use `YYYY-MM-DD`; `--from` cannot be after `--to`.
-- Repeat `--account-id` and `--check-type`, or provide comma-separated values.
-- Supported check types are `API`, `BROWSER`, `HEARTBEAT`, `MULTI_STEP`, `PLAYWRIGHT`, `TCP`, `ICMP`, `DNS`, `URL`, `GRPC`, `SSL`, `TRACEROUTE`, and `AGENTIC`.
-- JSON summary output is the raw API summary. Human-readable output performs an extra terms lookup to add the organization name and budget.
-
-## Series grouping, warnings, and pagination
-
-```bash
-npx checkly account usage series \
-  --from 2026-01-01 \
-  --to 2026-03-31 \
-  --interval week \
-  --group-by account,checkType \
-  --account-id <account-id> \
-  --limit 100 \
-  --output json
-```
-
-- `--interval` accepts `total`, `day`, `week`, or `month`; the default is `day`.
-- `--group-by` accepts `account`, `checkType`, or `account,checkType`; the default is `account,checkType`.
-- `--limit` must be between 1 and 500; the default is 100.
-- JSON output always includes `pagination.nextId` as `string | null`. Continue only when it is non-null; never pass `--cursor null`.
-- Repeat every original date, filter, grouping, interval, and limit flag when adding `--cursor <nextId>`. Changing any resolved query parameter invalidates the cursor.
-
-Example continuation:
-
-```bash
-npx checkly account usage series \
-  --from 2026-01-01 \
-  --to 2026-03-31 \
-  --interval week \
-  --group-by account,checkType \
-  --account-id <account-id> \
-  --limit 100 \
-  --cursor <non-null-nextId> \
-  --output json
-```
+- `summary.totals.creditsUsed` is nullable. Summary has no `percentOfBudget`, meters or projections. Its `breakdown[]` includes term ID, pricing-rule key, period, pricing rule, calculations and credits used, with optional account ID.
+- `usageTermsIds` is a list on summary/series. Join each ID to `term <id>` or `terms.data[]`; do not assume one contract.
+- Series `dimensions` carries selected account, term, pricing-rule and check-type dimensions. Rows use `creditsUsed`, not nested credits. `interval` and `groupBy` are top-level, with `groupBy` an array.
+- `runs` appears only with `--include runs` and can be null; available counters include `totalRuns`, `finalRuns`, `retryRuns`, `cancelledRuns`, `degradedRuns`, `failedRuns`, `errorRuns`, `abortedRuns`, and `overMaxResponseTimeRuns`. `--include calculations` adds pricing details to contributions.
+- `coverage.gaps[]` contains `{ from, to }` ranges; preserve gaps when summarizing coverage. It replaces the old series warnings array. Treat null credits/budgets/rates/projections as unknown, never zero.
+- Projections are a separate response: singular `usageTermsId`, `asOf`, nullable `period`, `weeksSinceStart`, `weeksRemaining`, `creditsUsed`, `remainingCredits`, `budgetedDailyCredits`, and `windows` (`sinceStart`, `last30Days`, `last7Days`, `last1Day`). Each window includes observed days, average daily credits, credits used, projected contract-end credits/remaining credits/percent, annual budget percent and weeks until exhaustion. Projection values can be null.
 
 ## Troubleshooting
 
-| Signal | Meaning and next action |
+| Signal | Action |
 |---|---|
-| HTTP `401` / "requires a user or service API key" | This is the blanket message for every unauthorized usage response, including revoked credentials, an incorrect `CHECKLY_ACCOUNT_ID`, an expired login, or a rejected legacy key. Run `npx checkly whoami` first, then use `checkly-auth` to repair the active user/service credential. |
-| HTTP `403` | Usage requires Owner or Admin on the active account. `whoami` does not show role; use `npx checkly members --role owner --status active --output json` and `npx checkly members --role admin --status active --output json`, match the current identity, and use `npx checkly switch --account-id <account-id>` if the authorized role is on another account. |
-| `NO_USAGE_TERMS` | With explicit `--to`, choose a date inside known terms. Without explicit `--to`, use `account plan` instead of probing dates for plan/entitlement questions. |
-| `USAGE_TERMS_CONFLICT` | Choose a `--to` date covered by only one contract. |
-| `ACCOUNT_NOT_IN_USAGE_TERMS` | Drop the account filter or correct `--account-id` to an ID in `terms.accounts[]`; changing only the date does not fix account membership. |
-| `INVALID_CURSOR` | Re-run page one with the same explicit `--from`, `--to`, and all other flags, then use its newly returned non-null cursor. |
-| `INVALID_RANGE` | Preserve the API message and correct the reported range problem. |
-| `USAGE_STORE_UNAVAILABLE` | Preserve the error and retry later; do not infer zero usage. |
-| `--to must be a valid calendar date...` / `--from must be a valid calendar date...` | Use a real calendar date in `YYYY-MM-DD`; values such as `2026-02-30` fail local validation. |
-| `--from must be on or before --to.` | Correct the local range order before retrying. |
+| `NO_USAGE_TERMS` | List terms and choose available term IDs or a covered date range; a missing detail/projection ID does not mean no contracts exist. |
+| `USAGE_TERMS_CONFLICT` | Choose non-overlapping terms with `--usage-terms-id` or narrow the range. |
+| `ACCOUNT_NOT_IN_USAGE_TERMS` | Correct the filter using the term's covered accounts. |
+| `INVALID_CURSOR` | Restart with pinned effective dates and all original flags. |
+| `INVALID_RANGE` | Correct the range described by the API. |
+| `USAGE_STORE_UNAVAILABLE` | Retry later; do not infer zero usage. |
+| Unauthorized / inaccessible account | Verify the effective account and current user/service credentials without logging keys. |
+| Bare permission failure | Verify `usage:read` permission on the active account. |
 
-## Related Skills
-
-- See `checkly-auth` for current user/service API keys, browser login, account switching, and credential troubleshooting.
-- See `checkly-members` to verify Owner/Admin membership on the active account.
-- See `checkly-checks` before triggering `checks run`, which consumes live account usage and may send alerts.
+See `checkly-auth` for account overrides and `checkly-members` for membership inspection.
