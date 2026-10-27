@@ -46,7 +46,7 @@ new UrlMonitor('dashboard-url', {
 })
 ```
 
-Intent supplements executable monitor assertions; it does not replace them. Omit the property to clear existing intent on deployment, provide an object to set/update it, or use `intent: null` to clear it deliberately. `goal` is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
+Intent supplements executable monitor assertions; it does not replace them. Provide an object to set or update intent; omit it or set `intent: null` to have none. Both omission and `null` clear any web-authored intent on deployment. `goal` is required and limited to 2,000 trimmed characters. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 trimmed characters per statement.
 
 ## Heartbeat monitors
 

@@ -1,8 +1,17 @@
 #!/bin/bash
-# Test project definitions, then let Checkly present and confirm its deploy plan.
-# Exit 3 means confirmation is required in CI/agent mode; 2 means invalid input.
+# Test the default project, then let Checkly present and confirm its deploy plan.
+# Usage: test-and-deploy.sh (no arguments).
+# Exit 3 means approval is required for a nonempty plan; no changes can exit 0.
+# After approval, run the returned confirmCommand verbatim with Checkly directly.
+# For custom --config or authorized CI flags, test and deploy the same config
+# directly; deploy-only argument forwarding could test one project and deploy another.
 
 set -e
+
+if [ "$#" -ne 0 ]; then
+  echo "This helper takes no arguments. Run Checkly directly for custom configs or an approved confirmCommand." >&2
+  exit 2
+fi
 
 echo "Testing checks in the Checkly runtime..." >&2
 if npx checkly test; then

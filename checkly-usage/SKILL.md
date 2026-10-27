@@ -110,6 +110,22 @@ These are abbreviated structural examples, not captured responses:
 - `coverage.gaps[]` contains `{ from, to }` ranges; preserve gaps when summarizing coverage. It replaces the old series warnings array. Treat null credits/budgets/rates/projections as unknown, never zero.
 - Projections are a separate response: singular `usageTermsId`, `asOf`, nullable `period`, `weeksSinceStart`, `weeksRemaining`, `creditsUsed`, `remainingCredits`, `budgetedDailyCredits`, and `windows` (`sinceStart`, `last30Days`, `last7Days`, `last1Day`). Each window includes observed days, average daily credits, credits used, projected contract-end credits/remaining credits/percent, annual budget percent and weeks until exhaustion. Projection values can be null.
 
+## Diagnose usage access
+
+The [Usage API](https://www.checklyhq.com/docs/api-reference/usage/overview/) requires `usage:read` (**View usage**). Owner and Admin have it by default. User API keys inherit their user's account role; service API keys use the role assigned to the key, not the creator's role. Where custom roles are enabled, they can grant this permission too. See [permission names](https://www.checklyhq.com/docs/admin/team-management/permissions#usage) and [API-key roles](https://www.checklyhq.com/docs/admin/creating-api-key/).
+
+```bash
+# Confirm the effective identity/account first; whoami does not expose a role.
+npx checkly whoami --output json
+# Check built-in active member roles; match the returned identity, not any admin.
+npx checkly members --role owner --status active --output json
+npx checkly members --role admin --status active --output json
+```
+
+These member lists diagnose built-in human membership, not the effective permissions of a service key or a custom role. Follow any non-null next-page cursor before concluding that a member is absent. For a service key, have an authorized account administrator inspect its assigned role in Account Settings > API keys, without revealing the key. For a custom role, inspect **View usage** under Account Settings > Roles (only on enabled accounts), or ask the owner/admin to confirm it. Do not change roles or create/rotate keys just to troubleshoot.
+
+If the authorized role belongs to another account, deliberately select that account for a **new CLI process**. Set or correct `CHECKLY_ACCOUNT_ID` before launch (or remove an unintended override before `npx checkly switch --account-id <account-id>`); then rerun `whoami`. A saved account switch cannot override a still-set environment selection. A successful `whoami` does not prove usage permission. A 401 requires credential/account diagnosis; a 403 or bare permission failure requires checking the effective role and `usage:read`, rather than repeatedly logging in.
+
 ## Troubleshooting
 
 | Signal | Action |
@@ -121,6 +137,6 @@ These are abbreviated structural examples, not captured responses:
 | `INVALID_RANGE` | Correct the range described by the API. |
 | `USAGE_STORE_UNAVAILABLE` | Retry later; do not infer zero usage. |
 | Unauthorized / inaccessible account | Verify the effective account and current user/service credentials without logging keys. |
-| Bare permission failure | Verify `usage:read` permission on the active account. |
+| HTTP 403 / bare permission failure | Follow [Diagnose usage access](#diagnose-usage-access): confirm the effective account, user membership or service-key role, and `usage:read`; Owner/Admin have it by default, and enabled custom roles can grant it. |
 
 See `checkly-auth` for account overrides and `checkly-members` for membership inspection.

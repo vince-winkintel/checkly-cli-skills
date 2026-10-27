@@ -272,7 +272,7 @@ npx checkly api /v1/checks/<check-id>
 npx checkly alert-channels list --output json --limit 100
 ```
 
-Only fetch alert-channel details for channel IDs referenced by the selected check or matching group. If the returned check has a group reference, inspect groups once with `npx checkly api /v1/check-groups` and locate the matching group. Do not probe guessed account/global alerting endpoints; if output only shows `useGlobalAlertSettings: true`, say global alert settings are selected but their policy details were not available in the inspected CLI/API output.
+Only fetch alert-channel details for channel IDs referenced by the selected check or matching group. If the raw REST check payload has a non-null `groupId`, inspect groups once with `npx checkly api /v1/check-groups` and match that ID. Inspect returned `doubleCheck` and `retryStrategy` for retry behavior; removing `groupId` and `doubleCheck` from construct inputs did not remove those REST fields. Do not probe guessed account/global alerting endpoints; if output only shows `useGlobalAlertSettings: true`, say global alert settings are selected but their policy details were not available in the inspected CLI/API output.
 
 ## Decision Trees
 

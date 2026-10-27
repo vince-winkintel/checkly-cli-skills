@@ -151,9 +151,8 @@ Intent is supported by `ApiCheck`, `BrowserCheck`, `MultiStepCheck`, `Playwright
 
 Deployment semantics are deliberate:
 
-- Omit `intent` to clear existing intent on deployment.
 - Provide an object to set or update intent.
-- Set `intent: null` to explicitly clear it.
+- Omit `intent` or set `intent: null` to have none; both clear any web-authored intent on deployment.
 
 The CLI trims surrounding whitespace. `goal` is required and limited to 2,000 characters after trimming. Constraints use exact uppercase types `REQUIRED_OUTCOME` or `MUST_PRESERVE`; each statement is limited to 1,000 characters, and each type may appear at most 20 times. Unknown fields or constraint types fail validation.
 
@@ -163,7 +162,7 @@ Removed names in this section are migration warnings, not valid construct option
 
 | Removed API | Current replacement |
 |---|---|
-| `AgenticCheck` | `BrowserCheck` or `MultiStepCheck` with `aiAutoRepairEnabled: true`. Removing a definition deletes that resource on the next deploy; review the plan and use preservation/adoption where needed. |
+| `AgenticCheck` | For new/replacement checks, use `BrowserCheck` or `MultiStepCheck` with `aiAutoRepairEnabled: true`. Existing checks can remain on the compatible legacy toolchain until retirement on **2026-12-01**; follow the [temporary compatibility path](references/agentic-check-transition.md) before upgrading. Removing a definition deletes that resource on the next deploy; review the plan and use preservation/adoption where needed. |
 | `doubleCheck` on checks, groups or defaults | `retryStrategy`; use the explicit builders below. |
 | `groupId`, `groupName` on constructs/config entries | `group: myGroup`; use a group declared in config or `CheckGroupV2.fromId()` for existing suite groups. |
 | `ApiCheck.localSetupScript`, `ApiCheck.localTearDownScript` | `setupScript: { content: '…' }`, `tearDownScript: { content: '…' }`. Groups retain their local-script properties for now. |

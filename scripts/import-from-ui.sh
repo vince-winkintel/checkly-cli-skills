@@ -7,7 +7,7 @@ echo "📥 Importing existing checks from Checkly..." >&2
 
 # Check authentication
 if ! npx checkly whoami &> /dev/null; then
-  echo "❌ Not authenticated. Run 'npx checkly login' first."
+  echo "❌ Not authenticated. Run 'npx checkly login' first." >&2
   exit 1
 fi
 

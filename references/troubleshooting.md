@@ -165,7 +165,7 @@ npx checkly api /v1/checks/<check-id>
 npx checkly alert-channels list --output json --limit 100
 ```
 
-If the returned check has a group reference, fetch groups once with `npx checkly api /v1/check-groups` and locate the matching group. Compare only confirmed `activated`, `muted`, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `retryStrategy` fields. Do not probe guessed account/global alert endpoints; if only `useGlobalAlertSettings: true` is visible, report that the global policy details were unavailable in the inspected output.
+If the raw REST check payload has a non-null `groupId`, fetch groups once with `npx checkly api /v1/check-groups` and match that ID. Compare only returned `activated`, `muted`, `groupId`, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `doubleCheck`, and `retryStrategy` fields. The removal of `groupId` and `doubleCheck` from construct inputs does not remove those API fields; inspect both retry fields on existing checks. Do not probe guessed account/global alert endpoints; if only `useGlobalAlertSettings: true` is visible, report that the global policy details were unavailable in the inspected output.
 
 ### Environment Variable Not Working
 

@@ -41,7 +41,7 @@
 
 ### 4. Scripts (4 Files)
 - `init-project.sh` - Initialize new Checkly monitoring project
-- `test-and-deploy.sh` - Test locally before deploying
+- `test-and-deploy.sh` - No-argument default-project test-and-review entry; run approved confirmation commands or custom-config workflows directly with Checkly
 - `import-from-ui.sh` - Import existing checks from Checkly UI
 - `validate-config.sh` - Validate project configuration
 

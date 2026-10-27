@@ -44,7 +44,7 @@ new ApiCheck('dashboard-api', {
 })
 ```
 
-Intent is separate from the check description and executable assertions. Omitting `intent` clears any web-authored intent on deployment; use an object to set/update it; use `intent: null` only to clear it deliberately. The CLI trims values and rejects unknown fields. `goal` is required and limited to 2,000 characters. Constraint types are exact uppercase `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 characters per statement.
+Intent is separate from the check description and executable assertions. Provide an object to set or update intent; omit it or set `intent: null` to have none. Both omission and `null` clear any web-authored intent on deployment. The CLI trims values and rejects unknown fields. `goal` is required and limited to 2,000 characters. Constraint types are exact uppercase `REQUIRED_OUTCOME` or `MUST_PRESERVE`, with at most 20 of each type and 1,000 characters per statement.
 
 ## Automatic check repair
 
@@ -63,6 +63,8 @@ new BrowserCheck('checkout-browser', {
 - Use `null` to make the check inherit the account-level setting explicitly.
 
 Only `true`, `false` or `null` are accepted; other values fail validation. Use this property only on `BrowserCheck` and `MultiStepCheck`. Do not infer support from `intent`, which has a wider construct surface. Deployment resets omitted overrides to account inheritance; preserve a desired per-check web setting by declaring it in code.
+
+On unsupported constructs such as `ApiCheck`, `PlaywrightCheck`, and monitors, TypeScript rejects `aiAutoRepairEnabled`, but plain JavaScript (or a type assertion) can pass it without a diagnostic. The unsupported input is ignored; synthesis sends the base account-inheritance value, not the requested override. A clean local validation, test, or deployment therefore does not prove automatic repair was enabled. This is different from the explicit diagnostics for removed properties.
 
 ## API Checks
 
@@ -582,13 +584,13 @@ npx checkly api /v1/checks/<check-id>
 npx checkly alert-channels list --output json --limit 100
 ```
 
-If a selected check has a group reference, fetch groups once and locate the matching group:
+If the raw REST check payload has a non-null `groupId`, fetch groups once and match that ID:
 
 ```bash
 npx checkly api /v1/check-groups
 ```
 
-Analyze only confirmed fields: `activated`, `muted`, the returned group reference, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `retryStrategy`. For channels, explain whether subscriptions are check-local, group-scoped, active, inactive, or unrelated. Do not use write methods, trigger checks, mutate incidents, or probe guessed account/global alerting endpoints. If output only shows `useGlobalAlertSettings: true`, report that global alert settings are selected but their policy details were not available in the inspected CLI/API output.
+Analyze only fields actually returned: `activated`, `muted`, `groupId`, `alertSettings`, `useGlobalAlertSettings`, `alertChannelSubscriptions`, `doubleCheck`, and `retryStrategy`. These are REST payload fields, not construct properties: `groupId` and the legacy `doubleCheck` remain API fields even though authoring those properties on constructs is rejected. Inspect both retry fields on existing checks; do not infer that the legacy toggle is absent or disabled merely because it was removed from construct inputs. For channels, explain whether subscriptions are check-local, group-scoped, active, inactive, or unrelated. Do not use write methods, trigger checks, mutate incidents, or probe guessed account/global alerting endpoints. If output only shows `useGlobalAlertSettings: true`, report that global alert settings are selected but their policy details were not available in the inspected CLI/API output.
 
 ### Drill into a result or error group
 

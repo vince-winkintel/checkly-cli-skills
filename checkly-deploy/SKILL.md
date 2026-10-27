@@ -57,8 +57,8 @@ If planning is unavailable, ordinary deploys may fall back with a warning. `--pl
 ## Drift protection and writing web changes into code
 
 ```bash
-# For an authorized pipeline that must not overwrite web edits
-npx checkly deploy --force --fail-on-drift
+# For an authorized pipeline: protect web edits and preserve removed resources/history
+npx checkly deploy --force --fail-on-drift --preserve-resources
 # Review drift without applying
 npx checkly deploy --preview --fail-on-drift
 ```
@@ -103,12 +103,39 @@ npx checkly deploy --schedule-on-deploy --schedule-on-deploy-scope=all --schedul
 
 ## Authorized CI deployment
 
-Set `CHECKLY_API_KEY` and `CHECKLY_ACCOUNT_ID` before starting the CLI. Install the locked project dependencies, run the intended tests, and apply only after they pass:
+Set `CHECKLY_API_KEY` and `CHECKLY_ACCOUNT_ID` before starting the CLI. Use a supported Node.js runtime **22.13.0 or later**, install the locked project dependencies, run the intended tests, and apply only after they pass.
+
+`--force` skips confirmation, including approval of deletions in the plan; `--fail-on-drift` protects web edits, not resources removed from code. The examples below use `--preserve-resources` to detach removed resources and keep their history. Review the plan and intentionally authorize the pipeline's creates, updates, resets and detachments. If deletion is intended, review a preview without preservation and pin its `--plan-token` when applying that exact approved plan; do not rely on drift protection as a deletion guard.
 
 ```bash
+# Run only in already authorized automation; preservation does not make updates harmless.
 npm ci
-npx checkly test && npx checkly deploy --force --fail-on-drift
+npx checkly test && npx checkly deploy --force --fail-on-drift --preserve-resources
 ```
+
+### Minimal GitLab CI example
+
+Store `CHECKLY_API_KEY` and `CHECKLY_ACCOUNT_ID` as masked/protected GitLab CI/CD variables, scoped to the intended account/environment; never put their values in YAML. The manual default-branch job is an approval gate for the reviewed changes, not permission for an agent to start it. The Node image is above the CLI's minimum runtime floor. Use a deployment-stage job in the project's existing stage list.
+
+```yaml
+deploy-checks:
+  stage: deploy
+  image: node:24
+  resource_group: checkly-production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+  script:
+    - npm ci
+    - npx checkly test
+    - npx checkly deploy --force --fail-on-drift --preserve-resources
+```
+
+The job inherits the two protected variables. Restrict default-branch and deployment approval permissions, and use the same locked code and account when reviewing the plan and running the approved job.
+
+### Test-and-review helper
+
+`scripts/test-and-deploy.sh` intentionally accepts no arguments: it tests the default project, then lets the CLI present/confirm its plan. In CI/agent mode a nonempty unapproved plan returns exit 3; an unchanged plan can return 0. After approval, run the returned `confirmCommand` verbatim **directly**, not through the helper. For a custom configuration or already authorized CI flags, invoke `checkly test` and `checkly deploy` directly with the same `--config` path. The helper rejects arguments before running any checks rather than testing one configuration and forwarding a different deploy target.
 
 An empty test selection fails by default. Do not suppress it in a gate intended to prove tests ran. Jenkins, TeamCity and AWS CodeBuild are detected alongside other CI providers; `CI=false`, `0`, `no` or `off` disables CI detection even on provider hosts. Prefer serialized deployment jobs per project.
 
