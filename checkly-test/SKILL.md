@@ -226,6 +226,10 @@ jobs:
           CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
 ```
 
+### GitHub Check re-runs
+
+For optional GitHub Check Re-run integration and the job-ID/re-run-mode metadata forwarded with test sessions, see `checkly-advanced`. The `github` reporter writes a Markdown summary file; it does not emit annotations or enable that integration by itself.
+
 ### Test with retries
 
 ```bash
@@ -280,7 +284,7 @@ npx checkly test --reporter=ci
 ```bash
 npx checkly test --reporter=github
 
-# Generates GitHub Actions annotations
+# Writes ./checkly-github-report.md (override with CHECKLY_REPORTER_GITHUB_OUTPUT)
 ```
 
 ### JSON reporter
