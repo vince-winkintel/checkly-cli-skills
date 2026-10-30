@@ -90,6 +90,15 @@ npx checkly test --reporter=github
 npx checkly test --reporter=ci
 ```
 
+### GitHub Check re-run metadata
+
+GitHub annotations from `--reporter=github` are separate from test-session repository metadata. With `CHECKLY_GITHUB_REPORT=true` or `1` (case-insensitive and whitespace-trimmed), the CLI includes a `github` object in the session's repository information when repository information is available. It forwards these optional environment values:
+
+- `CHECKLY_GITHUB_JOB_ID` → `github.jobId`: the GitHub job identifier, distinct from the existing job name in `CHECKLY_GITHUB_JOB` and workflow run ID in `CHECKLY_GITHUB_RUN_ID`.
+- `CHECKLY_GITHUB_RERUN` → `github.rerun`: the re-run mode, such as `repository-dispatch`; this is not a boolean CLI flag.
+
+Both values are trimmed; unset, empty, or whitespace-only values are omitted from the serialized payload. `checkly-action` supplies them when the workflow opts into Re-run on its Checkly GitHub Check; the backend uses the metadata to re-run the dispatching job. Forwarding values alone does not configure the action, grant GitHub permissions, or trigger a re-run. Keep re-run opt-in and workflow permissions explicitly reviewed: a re-run can repeat network checks and other job side effects. Do not invent a job ID, add broad permissions, or enable re-runs just to populate this metadata.
+
 ## Environment Variables
 
 ### Global variables

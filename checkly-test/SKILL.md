@@ -226,6 +226,10 @@ jobs:
           CHECKLY_ACCOUNT_ID: ${{ secrets.CHECKLY_ACCOUNT_ID }}
 ```
 
+### GitHub Check re-runs
+
+For optional GitHub Check Re-run integration and the job-ID/re-run-mode metadata forwarded with test sessions, see `checkly-advanced`. The `github` reporter only produces annotations; it does not enable that integration by itself.
+
 ### Test with retries
 
 ```bash
