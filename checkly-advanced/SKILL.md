@@ -1,6 +1,6 @@
 ---
 name: checkly-advanced
-description: Advanced Checkly CLI features including retry strategies, reporters, environment variables, bundling, and custom patterns. Use when implementing complex retry logic, customizing test output, managing secrets, or troubleshooting advanced scenarios. Triggers on retry strategy, reporter, environment variables, bundling, advanced configuration.
+description: Advanced Checkly CLI features including retry strategies, reporters, GitHub Check re-runs, environment variables, bundling, and custom patterns. Use when implementing complex retry logic, customizing test output, configuring opt-in GitHub Check re-run integration, managing secrets, or troubleshooting advanced scenarios. Triggers on retry strategy, reporter, GitHub Check re-run, Re-run button, repository_dispatch, environment variables, bundling, advanced configuration.
 ---
 
 # checkly advanced
@@ -78,11 +78,15 @@ npx checkly test --reporter=dot
 npx checkly test --reporter=json > results.json
 ```
 
-### GitHub Actions reporter
+### GitHub Markdown reporter
 
 ```bash
 npx checkly test --reporter=github
 ```
+
+Writes a Markdown summary to `./checkly-github-report.md`, or the path in
+`CHECKLY_REPORTER_GITHUB_OUTPUT`. It does not emit GitHub Actions annotations or
+configure a Checkly GitHub Check's Re-run button.
 
 ### CI reporter
 
@@ -90,14 +94,18 @@ npx checkly test --reporter=github
 npx checkly test --reporter=ci
 ```
 
-### GitHub Check re-run metadata
+## GitHub Check re-runs
 
-GitHub annotations from `--reporter=github` are separate from test-session repository metadata. With `CHECKLY_GITHUB_REPORT=true` or `1` (case-insensitive and whitespace-trimmed), the CLI includes a `github` object in the session's repository information when repository information is available. It forwards these optional environment values:
+The Markdown summary from `--reporter=github` is separate from test-session repository metadata. With `CHECKLY_GITHUB_REPORT=true` or `1` (case-insensitive and whitespace-trimmed), the CLI includes a `github` object in the session's repository information when repository information is available. It forwards these optional environment values:
 
-- `CHECKLY_GITHUB_JOB_ID` → `github.jobId`: the GitHub job identifier, distinct from the existing job name in `CHECKLY_GITHUB_JOB` and workflow run ID in `CHECKLY_GITHUB_RUN_ID`.
+- `CHECKLY_GITHUB_JOB_ID` → `github.jobId`: the numeric job check-run ID from `${{ job.check_run_id }}`, forwarded as a string. This is not `${{ github.job }}` (the job key, used by `CHECKLY_GITHUB_JOB`) or the workflow run ID in `CHECKLY_GITHUB_RUN_ID`. The CLI trims/forwards it without numeric validation, so the caller must supply the correct ID.
 - `CHECKLY_GITHUB_RERUN` → `github.rerun`: the re-run mode, such as `repository-dispatch`; this is not a boolean CLI flag.
 
-Both values are trimmed; unset, empty, or whitespace-only values are omitted from the serialized payload. `checkly-action` supplies them when the workflow opts into Re-run on its Checkly GitHub Check; the backend uses the metadata to re-run the dispatching job. Forwarding values alone does not configure the action, grant GitHub permissions, or trigger a re-run. Keep re-run opt-in and workflow permissions explicitly reviewed: a re-run can repeat network checks and other job side effects. Do not invent a job ID, add broad permissions, or enable re-runs just to populate this metadata.
+Both values are trimmed; unset, empty, or whitespace-only values are omitted from the serialized payload. With the action's `github-check-rerun: true` and `github-job-id: ${{ job.check_run_id }}` inputs, a Re-run click causes Checkly to send a `repository_dispatch` event of type `checkly-github-check-rerun`; a separate handler workflow on the repository's default branch invokes `checkly/checkly-action/rerun@v1` to perform the re-run. Forwarding metadata alone does not configure that handler or grant GitHub permissions.
+
+See [complete caller/handler setup and compatibility requirements](references/github-rerun.md) before enabling it. Keep the handler's event-type filter and narrowly scoped `actions: write` permission. This is for detached runs reporting through a Checkly GitHub Check; `reporting: github-actions` and runs that fall back to waiting ignore the opt-in. An older resolved CLI without job-ID forwarding support fails the detached action step before running checks; `job.check_run_id` is unavailable on GitHub Enterprise Server.
+
+Keep re-run opt-in and workflow permissions explicitly reviewed: GitHub re-runs the selected job **and dependent jobs**, using the original run's commit/workflow and original actor privileges. Review network checks, deployments, and every dependent job's other side effects before approval. Do not invent a job ID, add broad permissions, or enable re-runs just to populate metadata. These instructions describe setup; they are not authorization to install an app, change workflow permissions, or trigger a run.
 
 ## Environment Variables
 

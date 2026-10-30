@@ -1,6 +1,6 @@
 ---
 name: checkly-cli-skills
-description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, gRPC/SSL/traceroute monitors, check deployment, account plans, entitlements, organization usage, credits, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, monitors, testing, deployment, imports, account plan and usage, constructs, and advanced patterns. Triggers on checkly, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
+description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, GitHub Check re-runs, gRPC/SSL/traceroute monitors, check deployment, account plans, entitlements, organization usage, credits, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, monitors, testing, deployment, imports, account plan and usage, constructs, and advanced patterns. Triggers on checkly, GitHub Check Re-run button, repository_dispatch, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
 metadata:
   {
     "openclaw":
@@ -122,7 +122,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 **Advanced:**
 - `checkly-constructs` - Constructs system and resource management
 - `checkly-playwright` - Playwright test suites and configuration
-- `checkly-advanced` - Retry strategies, reporters, environment variables, bundling
+- `checkly-advanced` - Retry strategies, reporters, GitHub Check Re-run button and repository-dispatch handler setup, environment variables, bundling
 
 **Operations:**
 - `checkly-members` - Audit and manage Checkly account access with `npx checkly members`
@@ -448,7 +448,7 @@ checkly test
 **Advanced workflows:**
 - See `checkly-deploy` for deployment strategies
 - See `checkly-constructs` for understanding the object model
-- See `checkly-advanced` for retry strategies and reporters
+- See `checkly-advanced` for retry strategies, reporters, and opt-in GitHub Check re-runs
 
 **Import existing:**
 - See `checkly-import` to migrate from web UI to code

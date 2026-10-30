@@ -9,6 +9,7 @@ Historical notes consolidated from skill docs:
   - Clarified pnpm sibling workspace-link resolution relative to each importer, keeping normal workspace bundling distinct from registry tarball embedding and truly external links.
   - Added opt-in GitHub Check re-run metadata forwarding, exact environment-to-payload mappings, trimming/omission semantics, reporter separation, and workflow permission/side-effect review boundaries.
   - The upstream Slack release-notification change affects upstream CI only; no new CLI command or flag and no repository-local refresh automation are needed.
+  - Review remediation: documented the action caller plus default-branch, event-filtered Re-run handler and actions:write-only scope; retained the CLI 10.1.0 compatibility floor in a skill-local reference, clarified numeric job-ID provenance and dependent-job side effects, corrected Markdown reporter claims and routing, and distinguished finalize-time warnings from validate/empty bundles. Preserved safe single-version pins while requiring all shipped-lockfile versions, exact-workspace-entry errors versus wildcard skips, and partial-bundle/lexical workspace-classification limits. No action/workflow was installed or executed against a live service.
 
 - checkly-cli v10.0.0
   - Reviewed the complete major-release notes, official source tag 4f88d60 and integrity-verified published npm artifact on 2026-10-27.
