@@ -58,6 +58,8 @@ retryStrategy: RetryStrategyBuilder.fixedStrategy({
 
 ## Reporters
 
+File reporters (`github`, `json`) send progress to stderr. Only the first supplies progress when combined; `list`, `dot` or `ci` takes precedence. Stdout is not the JSON report. Keep stderr separate when processing results.
+
 With no explicit reporter, CI and agents use `ci`, other runs use `list`. Results go to stdout, diagnostics to stderr. Timed-out checks produce `Timed out` in JSON / `T` in dot output and exit 1. `--max-failures` on test/trigger reports unfinished checks separately; see `checkly-test`.
 
 ### List reporter (default outside CI and agent mode)
@@ -74,8 +76,10 @@ npx checkly test --reporter=dot
 
 ### JSON reporter
 
+Parse `./checkly-json-report.json`, or the path in `CHECKLY_REPORTER_JSON_OUTPUT`, rather than piping stdout into a JSON parser.
+
 ```bash
-npx checkly test --reporter=json > results.json
+npx checkly test --reporter=json
 ```
 
 ### GitHub Markdown reporter
@@ -108,6 +112,12 @@ See [complete caller/handler setup and compatibility requirements](references/gi
 Keep re-run opt-in and workflow permissions explicitly reviewed: GitHub re-runs the selected job **and dependent jobs**, using the original run's commit/workflow and original actor privileges. Review network checks, deployments, and every dependent job's other side effects before approval. Do not invent a job ID, add broad permissions, or enable re-runs just to populate metadata. These instructions describe setup; they are not authorization to install an app, change workflow permissions, or trigger a run.
 
 ## Environment Variables
+
+### CLI crash reporting
+
+Released CLI builds with reporting configured can send one report per invocation for a detected bug in the CLI's own code, including bugs caught and printed by a command. Set `CHECKLY_NO_ERROR_REPORTING=1` or `DO_NOT_TRACK=1` before invocation to opt out. This control is separate from test execution and authentication.
+
+Reports select error names/messages/stacks and CLI version, command/mode, OS, architecture and runtime information. They do not attach the full environment, command arguments or arbitrary error properties. The scrubber targets Checkly user/service API keys, Basic/Bearer credentials, URL credentials and known project/home/install paths. These targeted transformations are not a guarantee that every secret or user-provided value in an error message is removed.
 
 ### Global variables
 

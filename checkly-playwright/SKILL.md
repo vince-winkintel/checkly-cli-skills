@@ -7,6 +7,10 @@ description: Configure Playwright test suites with Checkly including playwright.
 
 Run full Playwright test suites as Checkly checks.
 
+`pw-test` validates the project: remove retired `me-south-1` from locations/defaults, and resolve any `SlackAppAlertChannel` with destinations whose account reports a disconnected Checkly Slack app. Connect the app or remove the channel. An explicit `--location me-south-1` fails with exit 2, including before `--create-check` can write that location. Missing Slack integration state in an API response skips that check.
+
+The `github`/`json` reporters send completed-check counters and retried-attempt progress to stderr, leaving their summary/report formats unchanged. Only one file reporter supplies progress; `list`, `dot` or `ci` takes over when present. An MQTT connection failure now includes the underlying causes in `Details`; diagnose result-stream connectivity before changing test assertions.
+
 ## Playwright Check Suite
 
 Deploy entire Playwright test suite:

@@ -38,6 +38,10 @@ Both `npx checkly import` and `npx checkly import plan` expose the plan command 
 
 ### 2. Review generated code before linking anything
 
+Generated check/group locations omit retired `me-south-1` (Bahrain). Review the remaining public/private coverage rather than reintroducing the region. Generation compares check properties against the loaded project's defaults to avoid silently adopting different settings.
+
+For programmatic generation from resource payloads, read [codegen contracts](references/codegen.md). This experimental package export produces source files in memory; it does not replace the import plan/apply/commit lifecycle.
+
 ```bash
 git status --short
 git diff --check

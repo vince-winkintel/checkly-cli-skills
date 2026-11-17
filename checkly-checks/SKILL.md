@@ -355,6 +355,8 @@ test('API status and catalog', async ({ request }) => {
 
 ### Schedule configuration
 
+Retired `me-south-1` is invalid in check locations, including inherited defaults and test-only checks. Choose a supported location before validation or deployment.
+
 ```typescript
 new ApiCheck('scheduled-check', {
   frequency: 5,  // minutes: 1, 5, 10, 15, 30, 60, 120, 1440
@@ -371,9 +373,11 @@ new ApiCheck('scheduled-check', {
 
 ### Response-time validation
 
-`degradedResponseTime` and `maxResponseTime` are top-level `ApiCheck` properties. They control check-state thresholds and are separate from `AssertionBuilder.responseTime()` request assertions.
+`degradedResponseTime` and `maxResponseTime` are top-level `ApiCheck` properties. Omitted values are sent explicitly as 5000 ms degraded and 20000 ms maximum, matching existing backend defaults. They control check-state thresholds and are separate from `AssertionBuilder.responseTime()` request assertions.
 
-The standard client-side ceiling for both API-check properties is 30 seconds. When the authenticated account advertises extended response-time limits, the CLI skips that fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume that entitlement is present: run `npx checkly test` with the target account and treat its validation or API response as authoritative. Older or self-hosted APIs that do not expose account feature flags keep the standard ceiling. In every case, `degradedResponseTime` must be less than or equal to `maxResponseTime`.
+The standard client-side ceiling for both API-check properties is 30 seconds. When the authenticated account advertises extended response-time limits, the CLI skips that fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume that entitlement is present: run `npx checkly test` with the target account and treat its validation or API response as authoritative. Older or self-hosted APIs that do not expose account feature flags keep the standard ceiling.
+
+`ApiCheck` checks ordering only when both values are explicit: degraded must not exceed maximum. For example, only `degradedResponseTime: 25000` produces no ordering diagnostic, but synthesis still sends the default maximum of 20000 ms. Absence of that diagnostic is not proof of total project validity or live API acceptance. Set both thresholds to an ordered pair.
 
 ### Tags and organization
 
@@ -385,6 +389,8 @@ new ApiCheck('tagged-check', {
 ```
 
 ### Alert configuration
+
+`SlackAppAlertChannel.slackChannels` accepts real `#channel` names, channel IDs such as `C0123456789`, or `@handles`. Invite the Checkly app to private channels. With nonempty destinations, `validate`, `deploy`, `test` and `pw-test` fail if the account reports the app as disconnected, even for a previously deployed channel. Connect the app at the account's integration settings or remove the channel. Missing integration state in an older API response skips this check; it does not prove alerts can be delivered.
 
 ```typescript
 import {
@@ -398,7 +404,7 @@ const emailChannel = new EmailAlertChannel('email-alerts', {
 })
 
 // For new Slack notifications, prefer the Checkly Slack App channel.
-// Use project-discovered #channel names or @user handles; do not invent them.
+// Use project-discovered #channels, channel IDs or @handles; do not invent them.
 const slackAppChannel = new SlackAppAlertChannel('slack-app-alerts', {
   name: 'Slack App alerts',
   slackChannels: ['#alerts'],
@@ -665,6 +671,10 @@ await page.click('.button')
 await page.click('button[data-testid="submit"]')
 await page.click('text=Submit')
 ```
+
+## Rocky AI disabled
+
+When `rca run` is refused because Rocky AI is disabled, the CLI reports `Rocky AI is disabled for this account.`, links the account's Rocky AI settings, and exits 1. With `--output json`, inspect `code: "ERR_ROCKY_AI_DISABLED"`. An account owner must enable the feature; changing check definitions or retrying the request does not resolve this account setting.
 
 ## Related Skills
 

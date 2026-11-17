@@ -7,6 +7,10 @@ description: Organize checks with CheckGroups for shared configuration, settings
 
 Organize checks with shared configuration.
 
+## Location validation
+
+Group `locations` cannot contain retired `me-south-1` (Bahrain). Remove or replace it, including in inherited `checks.locations` and the project test run location `cli.runLocation`; imports filter it from generated groups.
+
 ## Basic check group
 
 ```typescript
