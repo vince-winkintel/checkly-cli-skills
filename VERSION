@@ -1,8 +1,15 @@
-1.0.21
+1.0.22
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+
+- checkly-cli v10.2.0
+  - Reviewed all 19 commits and 193 changed leaves in 10.1.0...10.2.0 against Git-tree-verified official source commit 2b32bb6e0dd4377ca901f3091dd7a7710bcb0b13 on 2026-11-17.
+  - Documented github/json stderr progress and deduplication, unchanged report destinations, GitHub table escaping, Slack app validation, retired Bahrain locations, type-only bundling, crash reporting opt-outs, Rocky AI and MQTT errors, and explicit monitor/check defaults.
+  - Corrected traceroute defaults and threshold ordering, including zero-max semantics and ICMP effective defaults. Documented experimental checkly/codegen, project-default preservation and generated-code review limits.
+  - No new CLI flags or binary-capture claim: semantics were verified from source; existing help provenance and compatibility minima are retained. Upstream CI, dependency and pnpm development-tooling changes introduce no new operator command.
+
 - checkly-cli v10.1.0
   - Reviewed the complete 10.0.0...10.1.0 compare (four commits), official source tag 4e450744e9e0bf8e6b842dbbe9e5e68ea5c999c2, and SHA512-integrity/SHA1-verified npm artifact on 2026-10-30.
   - Documented partial-embed stderr warnings, runner registry-metadata/ETARGET consequences, package-name remediation, direct-tarball-install caveats, and comparison against the shipped/pruned lockfile.

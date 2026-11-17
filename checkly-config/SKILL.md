@@ -102,7 +102,11 @@ Deploy owns every property in code. Omitting description/intent clears it; omitt
 
 Deploy and validate warn when a check has neither public nor private locations after defaults/group settings are resolved. Set `checks.locations`, `checks.privateLocations`, or explicit group/check locations. The warning does not block deployment.
 
+A `SlackAppAlertChannel` with nonempty `slackChannels` fails `validate`, `deploy`, `test` and `pw-test` when the account reports the Checkly Slack app as disconnected, including previously deployed channels. Connect the app in the account integration settings or remove the channel. If the API omits Slack integration state, this check is skipped; that does not establish deliverability.
+
 The native `oxc-parser` reads TypeScript without loading the project's TypeScript compiler, including projects using TypeScript 7. Stricter syntax parsing rejects constructs such as an uninitialized `const` or `await` as an identifier; accessor class fields are supported. A missing platform-native parser package requires reinstalling dependencies with optional packages on the target OS, rather than copying `node_modules` across systems. Malformed `tsconfig.json` is ignored as absent; validate its syntax independently when module/path settings matter.
+
+Check bundling excludes dependencies reached only through declaration-level `import type`, `export type { X } from`, or `export type * from`. It still follows `import { type X } from`: although Checkly's runtime erases that import, a project compiled with `verbatimModuleSyntax` can retain a side-effect import. This is not a blanket exclusion of files containing only types.
 
 Each construct is attributed to the file that declares it, including shared modules. This controls deploy-plan source labels, test file filters, list grouping and relative `entrypoint` paths. When `repoUrl` is unset, deploy/test resolve it from GitHub Actions repository variables, then git `origin`, converting SSH URLs to HTTPS and removing credentials. `init` records the resolved URL in generated config.
 
@@ -380,6 +384,8 @@ new ApiCheck('auth-api', {
 ## Location configuration
 
 ### Available locations
+
+`me-south-1` (Bahrain) is retired. Remove or replace it in check, monitor and group `locations`, shared `checks.locations`, and `cli.runLocation`. TypeScript no longer accepts it; JavaScript or casts fail configuration validation in `validate`, `deploy`, `test` and `pw-test`. An explicit `--location me-south-1` on `test`, `pw-test` or `trigger` is invalid input (exit 2); a retired configured run location is a configuration error (exit 1). Import-generated code omits the retired region.
 
 Common Checkly datacenter locations:
 

@@ -9,6 +9,10 @@ Deploy project definitions to Checkly with a reviewed, property-level plan. Thes
 
 ## Review and apply
 
+Validation can stop planning: a `SlackAppAlertChannel` with destinations requires a connected Checkly Slack app when the account API reports its state. This includes channels deployed before disconnection; connect the app or remove the channel. Remove retired `me-south-1` from checks, monitors, groups, `checks.locations` and `cli.runLocation`. These checks also apply to `validate`, `test` and `pw-test`.
+
+Checks and monitors send their default degraded/max limits explicitly, matching existing backend defaults rather than changing unset deployed limits. Review any baseline or payload-format changes in the plan; ICMP and traceroute validation compares explicit values with effective defaults (see `checkly-monitors`).
+
 ```bash
 npx checkly validate
 npx checkly deploy --preview

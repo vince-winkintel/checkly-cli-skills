@@ -7,6 +7,8 @@ description: Create health and infrastructure monitors including heartbeat, TCP,
 
 Health and infrastructure checks without browser code execution.
 
+Retired `me-south-1` (Bahrain) is invalid in monitor locations and inherited defaults. Remove or replace it before validation, testing or deployment.
+
 ## Monitor types
 
 | Monitor | Use case | Checks |
@@ -214,6 +216,8 @@ new SslMonitor('tls-certificate', {
 
 Use `TracerouteMonitor` for path latency, hop-count, and packet-loss diagnostics. The request `url` is a hostname without a scheme or port.
 
+Response-time limits measure final-hop average round-trip latency: defaults are 500 ms degraded and 1000 ms failed. Validation compares effective values even when only one is set: degraded above 1000 requires an explicit maximum; a positive maximum below 500 requires an explicit degraded limit. `maxResponseTime: 0` disables failure on latency and lets the degraded limit apply alone. Equal limits leave no degraded state. These defaults match what deployed monitors with unset limits already use.
+
 ```typescript
 import {
   TracerouteAssertionBuilder,
@@ -222,8 +226,8 @@ import {
 
 new TracerouteMonitor('network-path', {
   name: 'Network Path',
-  degradedResponseTime: 10000,
-  maxResponseTime: 20000,
+  degradedResponseTime: 500,
+  maxResponseTime: 1000,
   request: {
     url: 'example.com',
     protocol: 'TCP',
@@ -246,6 +250,10 @@ new TracerouteMonitor('network-path', {
 
 ## Response-time validation
 
+Constructs send effective default limits explicitly; omitted values continue to match backend defaults. Defaults in milliseconds (degraded / maximum) are API 5000 / 20000, URL and TCP 3000 / 5000, DNS 500 / 1000, gRPC 10000 / 20000, SSL 3000 / 10000, and traceroute 500 / 1000. These are defaults, not the validation ceilings below.
+
+For `IcmpMonitor`, `degradedPacketLossThreshold` defaults to 10 and `maxPacketLossThreshold` to 20 (percent). Effective degraded must be at most effective maximum: setting only degraded above 20 fails, as does setting only maximum below 10. Set both explicitly for a different valid pair; explicit zero is preserved.
+
 `degradedResponseTime` and `maxResponseTime` are top-level monitor properties. They control degraded/failing check states and are separate from response-time assertions inside `request.assertions`.
 
 The CLI applies these standard client-side ceilings when the authenticated account does not advertise extended response-time limits:
@@ -259,7 +267,7 @@ The CLI applies these standard client-side ceilings when the authenticated accou
 | SSL | 30 seconds |
 | Traceroute | 30 seconds |
 
-For accounts with extended limits, the CLI skips the fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume the entitlement is present: validate with `npx checkly test` against the target account. Older or self-hosted APIs that do not expose account feature flags keep the standard ceilings. In every case, `degradedResponseTime` must be less than or equal to `maxResponseTime`.
+For accounts with extended limits, the CLI skips the fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume the entitlement is present: validate with `npx checkly test` against the target account. Older or self-hosted APIs that do not expose account feature flags keep the standard ceilings. The degraded limit must not exceed the effective maximum, including defaults where checked. Traceroute with `maxResponseTime: 0` is the exception: latency failure is disabled.
 
 ## Validate and deploy
 

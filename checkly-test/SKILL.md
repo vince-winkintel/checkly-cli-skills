@@ -281,6 +281,8 @@ npx checkly test --reporter=ci
 
 ### GitHub reporter
 
+The `github` and `json` reporters print completed checks with `[finished/total]` counters and retried attempts to stderr. This progress does not change stdout summaries, the JSON report format, or the GitHub summary structure. With `list`, `dot` or `ci`, that console reporter supplies progress; with both `github,json`, only the first supplies it. The file reporters do not duplicate the startup `Running N checks` line. GitHub table cells escape pipes and replace CR/LF line breaks with spaces in check names, types and filenames, including unfinished rows.
+
 ```bash
 npx checkly test --reporter=github
 
@@ -289,8 +291,10 @@ npx checkly test --reporter=github
 
 ### JSON reporter
 
+JSON is written to `./checkly-json-report.json` (override with `CHECKLY_REPORTER_JSON_OUTPUT`). Parse that file; stdout contains a brief summary, saved-file notice and session URL, not the JSON report. Keep stderr separate for progress and diagnostics.
+
 ```bash
-npx checkly test --reporter=json > results.json
+npx checkly test --reporter=json
 
 # Machine-readable output
 ```
@@ -298,6 +302,10 @@ npx checkly test --reporter=json > results.json
 For failed gRPC, SSL, and traceroute monitors, terminal and JSON reporters include type-specific diagnostics when available. Inspect gRPC status/health/metadata, TLS certificate and handshake details, or traceroute hops/latency/packet loss before falling back to generic network troubleshooting.
 
 ## Testing strategies
+
+Before running, resolve configuration errors: retired `me-south-1` in locations/defaults is rejected, and `--location me-south-1` fails with exit 2. A `SlackAppAlertChannel` with destinations fails when the account reports the Checkly Slack app as disconnected; connect the app or remove the channel. The same validation applies to `validate`, `deploy` and `pw-test`.
+
+If `test`, `pw-test` or `trigger` cannot connect to the result stream, the error identifies the Checkly connection failure and includes its cause in `Details`, including per-address causes from an aggregate connection error. Diagnose connectivity/proxy/broker configuration; an MQTT transport failure is not a failed assertion. Errors while processing results or reporter callbacks fail the run rather than escaping as unhandled queue/timer errors. Once the run stops, pending timers and queued results are cleared.
 
 ### Local-first workflow
 

@@ -45,6 +45,8 @@ The current Checkly CLI requires Node.js 22.13.0 or later. Verify `node --versio
 
 ## Process and output contract
 
+For source-backed details on reporter streams, validation, crash reporting, and error diagnosis, read [runtime contracts](references/runtime-contracts.md).
+
 Commands return results on stdout and progress, warnings, human-readable errors, hints and prompts on stderr. Keep streams separate for JSON parsing. Exit codes: 0 success, 1 failure, 2 invalid flags/arguments, 3 confirmation required. A second Ctrl+C terminates with SIGINT (shell status 130).
 
 Deploy plans by default and schedules no immediate checks unless `--schedule-on-deploy` is set. No-change plans need no confirmation. `test` and `pw-test` fail on an empty selection; only `test --no-fail-on-no-matching` opts out. See `checkly-deploy` and `checkly-test` for the full contracts.
