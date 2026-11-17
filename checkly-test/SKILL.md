@@ -255,6 +255,8 @@ API_KEY=test-key-123
 
 ## Reporters
 
+The `github` and `json` file reporters send completed-check counters and retried-attempt progress to stderr, not into the report files. With `list`, `dot` or `ci`, that console reporter supplies progress; with `github,json`, only the first file reporter supplies it. They do not duplicate the startup `Running N checks` line. Stdout summaries and report formats are unchanged.
+
 ### List reporter (default outside CI and agent mode)
 
 ```bash
@@ -281,7 +283,7 @@ npx checkly test --reporter=ci
 
 ### GitHub reporter
 
-The `github` and `json` reporters print completed checks with `[finished/total]` counters and retried attempts to stderr. This progress does not change stdout summaries, the JSON report format, or the GitHub summary structure. With `list`, `dot` or `ci`, that console reporter supplies progress; with both `github,json`, only the first supplies it. The file reporters do not duplicate the startup `Running N checks` line. GitHub table cells escape pipes and replace CR/LF line breaks with spaces in check names, types and filenames, including unfinished rows.
+GitHub table cells escape pipes and replace CR/LF line breaks with spaces in check names, types and filenames, including unfinished rows. Like JSON, its progress goes to stderr; see the shared reporter rules above.
 
 ```bash
 npx checkly test --reporter=github
@@ -296,7 +298,7 @@ JSON is written to `./checkly-json-report.json` (override with `CHECKLY_REPORTER
 ```bash
 npx checkly test --reporter=json
 
-# Machine-readable output
+# Writes ./checkly-json-report.json (override with CHECKLY_REPORTER_JSON_OUTPUT)
 ```
 
 For failed gRPC, SSL, and traceroute monitors, terminal and JSON reporters include type-specific diagnostics when available. Inspect gRPC status/health/metadata, TLS certificate and handshake details, or traceroute hops/latency/packet loss before falling back to generic network troubleshooting.

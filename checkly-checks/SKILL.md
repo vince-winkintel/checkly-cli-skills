@@ -375,7 +375,9 @@ new ApiCheck('scheduled-check', {
 
 `degradedResponseTime` and `maxResponseTime` are top-level `ApiCheck` properties. Omitted values are sent explicitly as 5000 ms degraded and 20000 ms maximum, matching existing backend defaults. They control check-state thresholds and are separate from `AssertionBuilder.responseTime()` request assertions.
 
-The standard client-side ceiling for both API-check properties is 30 seconds. When the authenticated account advertises extended response-time limits, the CLI skips that fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume that entitlement is present: run `npx checkly test` with the target account and treat its validation or API response as authoritative. Older or self-hosted APIs that do not expose account feature flags keep the standard ceiling. In every case, `degradedResponseTime` must be less than or equal to `maxResponseTime`.
+The standard client-side ceiling for both API-check properties is 30 seconds. When the authenticated account advertises extended response-time limits, the CLI skips that fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume that entitlement is present: run `npx checkly test` with the target account and treat its validation or API response as authoritative. Older or self-hosted APIs that do not expose account feature flags keep the standard ceiling.
+
+`ApiCheck` checks ordering only when both values are explicit: degraded must not exceed maximum. For example, only `degradedResponseTime: 25000` produces no ordering diagnostic, but synthesis still sends the default maximum of 20000 ms. Absence of that diagnostic is not proof of total project validity or live API acceptance. Set both thresholds to an ordered pair.
 
 ### Tags and organization
 

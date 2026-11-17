@@ -264,6 +264,8 @@ npx checkly checks get <check-id> --result <result-id>
 
 When investigating a deployed failure, look for `errorGroups`, `rootCause`, or `RCA` fields in the output. If Checkly already surfaced Rocky AI root-cause analysis, reuse that context before suggesting additional debugging steps.
 
+If `rca run` reports `Rocky AI is disabled for this account.` (exit 1; JSON `code: "ERR_ROCKY_AI_DISABLED"`), an account owner must enable Rocky AI using the account-settings link in the error. Do not retry or edit checks to fix this account setting. This code identifies the disabled-feature condition, not every HTTP 403.
+
 To trigger deployed checks rather than test local project definitions, route to `checkly-checks` for `npx checkly checks run`. This creates live check sessions using deployed locations and alerting rules, so confirm the intended check IDs or tags before running it; omitting selectors targets all deployed checks.
 
 For alerting questions, use read-only JSON/API evidence before table output:

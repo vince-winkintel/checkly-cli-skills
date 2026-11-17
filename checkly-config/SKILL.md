@@ -394,7 +394,7 @@ Common Checkly datacenter locations:
 | US East (N. Virginia) | `us-east-1` |
 | US West (California) | `us-west-1` |
 | Europe (Ireland) | `eu-west-1` |
-| Europe (Paris) | `eu-central-1` |
+| Europe (Frankfurt) | `eu-central-1` |
 | Asia Pacific (Singapore) | `ap-southeast-1` |
 | Asia Pacific (Tokyo) | `ap-northeast-1` |
 | South America (São Paulo) | `sa-east-1` |

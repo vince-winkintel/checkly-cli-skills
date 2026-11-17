@@ -267,7 +267,18 @@ The CLI applies these standard client-side ceilings when the authenticated accou
 | SSL | 30 seconds |
 | Traceroute | 30 seconds |
 
-For accounts with extended limits, the CLI skips the fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume the entitlement is present: validate with `npx checkly test` against the target account. Older or self-hosted APIs that do not expose account feature flags keep the standard ceilings. The degraded limit must not exceed the effective maximum, including defaults where checked. Traceroute with `maxResponseTime: 0` is the exception: latency failure is disabled.
+For accounts with extended limits, the CLI skips the fixed ceiling and lets the Checkly API enforce the account-specific limit. Do not assume the entitlement is present: validate with `npx checkly test` against the target account. Older or self-hosted APIs that do not expose account feature flags keep the standard ceilings.
+
+Ordering diagnostics depend on the construct, independently of those ceilings:
+
+| Construct | Client-side ordering comparison |
+|---|---|
+| `ApiCheck`, `UrlMonitor`, `TcpMonitor`, `DnsMonitor` | Compare only when both response-time thresholds are explicit. |
+| `GrpcMonitor`, `SslMonitor` | Also compare explicit degraded against an omitted maximum (20000 / 10000 ms respectively); an omitted degraded is not compared against explicit maximum. |
+| `TracerouteMonitor` | Compare both effective response-time thresholds, including either omitted default (500 / 1000 ms); maximum zero disables latency failure. |
+| `IcmpMonitor` | Compare both effective packet-loss thresholds, including either omitted default (10 / 20 percent). |
+
+Thus only `degradedResponseTime: 8000` on `UrlMonitor`, or only `degradedResponseTime: 25000` on `ApiCheck`, produces no response-time ordering diagnostic; synthesis still sends the omitted maximum as 5000 / 20000 ms. This does not establish total project validity or live API acceptance. Prefer setting both thresholds to an ordered pair rather than relying on this validation gap.
 
 ## Validate and deploy
 

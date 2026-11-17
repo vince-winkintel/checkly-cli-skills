@@ -244,12 +244,10 @@ npx checkly whoami
 | `CHECKLY_ACCOUNT_ID` | With API key | Account GUID; also overrides the saved login default |
 | `CHECKLY_API_URL` | No | Override the local API URL when `CHECKLY_ENV=local` (default: `http://127.0.0.1:3000`) |
 | `CHECKLY_MQTT_URL` | No | Override the local events/MQTT broker when `CHECKLY_ENV=local` |
-| `CHECKLY_NO_ERROR_REPORTING` / `DO_NOT_TRACK` | No | Set either to `1` to disable CLI crash reporting |
+| `CHECKLY_NO_ERROR_REPORTING` / `DO_NOT_TRACK` | No | Set either to `1` before invocation to disable CLI crash reporting. Credential/path scrubbing is targeted, not blanket redaction of arbitrary error text; see `checkly-advanced` for scope. |
 | `CHECKLY_NO_BROWSER` | No | Set to `1` to print device-login URL/code without opening a browser |
 
 `CHECKLY_MQTT_URL` is advanced troubleshooting configuration for local or custom setups where test-session event streams come from a different broker. It is analogous to `CHECKLY_API_URL` for local endpoint overrides, not a normal hosted Checkly credential or default CI setting.
-
-Set `CHECKLY_NO_ERROR_REPORTING=1` or `DO_NOT_TRACK=1` before CLI invocation to disable CLI crash reports. Reports use targeted credential/path scrubbing, not blanket redaction of arbitrary error text; see `checkly-advanced` for scope.
 
 ## Authentication is fixed for each invocation
 

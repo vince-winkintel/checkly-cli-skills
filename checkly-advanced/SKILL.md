@@ -58,7 +58,7 @@ retryStrategy: RetryStrategyBuilder.fixedStrategy({
 
 ## Reporters
 
-The `github` and `json` reporters print completed checks with `[finished/total]` counters and retried attempts to stderr. This progress does not change stdout summaries, the JSON report format, or the GitHub summary structure. With `list`, `dot` or `ci`, that console reporter supplies progress; with both `github,json`, only the first supplies it. The file reporters do not duplicate the startup `Running N checks` line. GitHub table cells escape pipes and replace CR/LF line breaks with spaces in check names, types and filenames, including unfinished rows.
+File reporters (`github`, `json`) send progress to stderr. Only the first supplies progress when combined; `list`, `dot` or `ci` takes precedence. Stdout is not the JSON report. Keep stderr separate when processing results.
 
 With no explicit reporter, CI and agents use `ci`, other runs use `list`. Results go to stdout, diagnostics to stderr. Timed-out checks produce `Timed out` in JSON / `T` in dot output and exit 1. `--max-failures` on test/trigger reports unfinished checks separately; see `checkly-test`.
 
@@ -76,7 +76,7 @@ npx checkly test --reporter=dot
 
 ### JSON reporter
 
-JSON is written to `./checkly-json-report.json` (override with `CHECKLY_REPORTER_JSON_OUTPUT`). Parse that file; stdout contains a brief summary, saved-file notice and session URL, not the JSON report. Keep stderr separate for progress and diagnostics.
+Parse `./checkly-json-report.json`, or the path in `CHECKLY_REPORTER_JSON_OUTPUT`, rather than piping stdout into a JSON parser.
 
 ```bash
 npx checkly test --reporter=json

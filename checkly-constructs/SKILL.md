@@ -5,9 +5,11 @@ description: Understand the Checkly constructs system including resource lifecyc
 
 # checkly constructs
 
-Checks and monitors synthesize their default degraded/max limits explicitly, matching backend defaults. See `checkly-monitors` for traceroute and ICMP ordering rules. Retired `me-south-1` is rejected in locations, and Slack App alert channels with destinations require a connected app when the account reports integration state.
-
 The Checkly constructs system provides type-safe abstractions for monitoring resources.
+
+## Validation boundaries
+
+Checks and monitors synthesize default degraded/max limits explicitly, matching backend defaults; absence of an ordering diagnostic is not proof that the API accepts the payload. Retired `me-south-1` is invalid in resource locations, shared `checks.locations` and `cli.runLocation`; remove or replace it. A Slack App alert channel with destinations fails validation if the account reports the app disconnected; connect it or remove the channel. Missing integration state skips this check, not proof of deliverability.
 
 ## Core concepts
 

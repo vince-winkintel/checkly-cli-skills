@@ -155,6 +155,10 @@ npx checkly checks get <check-id> --output json
 
 Look for `errorGroups`, `rootCause`, or `RCA` fields. If Rocky AI already produced a root-cause analysis, reuse that before adding more manual debugging advice.
 
+### Rocky AI Disabled
+
+If `rca run` reports `Rocky AI is disabled for this account.`, it exits 1 and includes an account-settings link. JSON output includes `code: "ERR_ROCKY_AI_DISABLED"`. Ask an account owner to enable Rocky AI there; retrying or editing check definitions cannot fix the setting. Do not treat every HTTP 403 as this condition.
+
 ### Alert Did Not Fire
 
 Use read-only structured evidence; table output can omit critical alerting fields.
