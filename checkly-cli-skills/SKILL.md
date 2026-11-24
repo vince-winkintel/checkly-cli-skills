@@ -442,7 +442,7 @@ checkly test
 - See `checkly-auth` for authentication setup
 - See `checkly-config` for project configuration
 - See `checkly-test` for local testing workflow
-- See `checkly-usage` for account plans, entitlements, contract credits, and usage reporting
+- See `checkly-usage` for account plans, entitlements, contract credits, self-service USD usage, usage reporting, and spending caps
 
 **Creating checks:**
 - See `checkly-checks` for API and browser checks

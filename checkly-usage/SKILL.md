@@ -1,13 +1,13 @@
 ---
 name: checkly-usage
-description: Use when inspecting Checkly account plans, entitlements, usage terms, contract credits, self-service USD usage, projections, per-period consumption, or overage spending caps; when selecting account usage filters, interpreting machine output, or reviewing an explicitly authorized spending-cap set or removal.
+description: Inspect Checkly account plans, entitlements, feature limits, plan limits, private-location entitlements, contract credits, self-service USD usage, projections, and overage spending caps. Use when selecting usage filters, interpreting machine output, or reviewing an explicitly authorized spending-cap set or removal. Triggers on checkly account plan, checkly account usage, checkly account spending-cap, usage terms, usage summary, usage series, per-period consumption, private-location availability, spending cap.
 ---
 
 # Checkly account plan, usage and spending cap
 
 Use `account plan` for account entitlements and limits. Use `account usage` for contract or self-service terms, measured consumption and projections. Use `account spending-cap` to inspect overage limits; changes require the authorization workflow below. Confirm the effective account with `npx checkly whoami --output json` before interpreting results. Usage requires a current user/service credential with `usage:read` permission; legacy account keys are not accepted.
 
-Compatibility: optional projection IDs, unit-aware usage fields and spending-cap commands require Checkly CLI **10.3.0+**. These are source-backed semantics, not binary help captures. Immutable sources: [usage types and endpoints](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/rest/usage.ts), [projection command](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/account/usage/projections.ts), and [usage formatting](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/formatters/usage.ts).
+Check the [CLI compatibility requirements](references/compatibility.md) before using optional projection IDs, unit-aware usage fields, the combined pricing-rule keys, or spending-cap commands. These are source-backed semantics, not binary help captures. Immutable sources: [usage types and endpoints](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/rest/usage.ts), [projection command](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/account/usage/projections.ts), and [usage formatting](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/formatters/usage.ts).
 
 ## Command map
 
@@ -38,13 +38,13 @@ After the user selects a change, preview `account spending-cap set <dollars> --d
 
 - Dollars range from **0 to 10000 inclusive**, with at most two decimals; `12.5` and `12.50` are valid. Parsing trims surrounding whitespace and converts decimal digits to integer cents. Negative values, exponent notation, `$` prefixes, `.5`, `5.`, and excess precision are invalid (exit 2).
 - Zero allows no overage: checks stop once included runs are exhausted. Lowering the cap to or below positive overage already measured can stop checks immediately. Removing it leaves overage uncapped. Treat these as billing and monitoring changes even though `set` metadata says `destructive: false`.
-- `--dry-run` takes precedence over `--force`, prints JSON `status: "dry_run"` and exits 0. Unconfirmed agent/CI mutations print a JSON `confirmation_required` preview and exit 3; interactive cancellation exits 0 without writing. Previews are distinct from successful results, even with `--output json`.
-- Show JSON is the raw GET response: `spendingCapCents` plus `standing`. Successful mutation JSON is the PUT response (`spendingCapCents`), without a fresh standing. Human mutation output is a success message. Results/previews go to stdout; interactive prompts and diagnostics go to stderr; runtime failures exit 1.
+- `--dry-run` takes precedence over `--force`, prints JSON `status: "dry_run"` and exits 0. Unconfirmed agent/CI mutations print a JSON `confirmation_required` preview and exit 3. Unrecognized runtimes, including plain scripts and cron jobs, fall back to interactive mode: confirmation can wait for input or cancel with exit 0 without writing. Unattended callers should explicitly set `CHECKLY_CLI_MODE=agent` before launch (accepted values: `interactive`, `ci`, `agent`); mode selection does not authorize a write. Exit 0 alone is not evidence of a mutation: require the PUT result or success message plus exact-account readback. Previews are distinct from successful results, even with `--output json`.
+- Show JSON is the raw GET response: `spendingCapCents` plus `standing`. Successful mutation JSON is the PUT response (`spendingCapCents`), without a fresh standing. Human mutation output is a success message. Results and JSON (`dry_run` / `confirmation_required`) previews go to stdout; the interactive preview, prompts and diagnostics go to stderr; runtime failures exit 1.
 - `spendingCapCents: null` means no cap; `0` means no overage. `standing: null` means unmeasured or a plan without overage, **not zero spend**. A measured standing includes `measuredAt`, `pools` keyed by product (`used`, `included`, `overageRuns`, `overageCents`), aggregate `overageCents`, and nullable `limit` (`capCents`, `state`, `closeAtCents`). States are `UNDER`, `CLOSE`, `REACHED`; only `REACHED` reports checks stopped. Do not infer a fixed warning threshold: use `closeAtCents`.
 - Amounts are US cents; overage may include fractional cents. Human spending-cap output rounds dollars to two decimals; JSON retains API precision. With no standing, human output omits checks-stopped status; with no limit, it omits cap status.
 - GET needs `billing:read`; PUT needs `billing:update` (and the CLI's preceding GET still needs read access). A 401 explains that user/service keys are required and legacy account keys are rejected. A normal 403 points to billing permission and self-serve billing; account-inaccessible errors retain their account diagnosis. A 409 rejects ineligible plans such as prepaid or contract. Do not change credentials, roles or plans to bypass these errors.
 
-Immutable sources: [commands](https://github.com/checkly/checkly-cli/tree/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/account/spending-cap), [show](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/account/spending-cap.ts), [REST types](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/rest/spending-cap.ts), [validation and warnings](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/helpers/spending-cap.ts), and [confirmation behavior](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/authCommand.ts).
+Immutable sources: [commands](https://github.com/checkly/checkly-cli/tree/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/account/spending-cap), [show](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/account/spending-cap.ts), [REST types](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/rest/spending-cap.ts), [validation and warnings](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/helpers/spending-cap.ts), [confirmation behavior](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/commands/authCommand.ts), and [mode detection](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/helpers/cli-mode.ts).
 
 ## Account plan
 
@@ -93,9 +93,19 @@ Continue only when `pagination.nextId` is non-null. Reuse effective dates and ev
 
 ## JSON contract
 
-Read `unit` before interpreting amounts: `credits` for contract terms, `usdCents` for self-service terms. Summary/series `unit` may be null; do not invent a currency or combine unlike units. Human usage output converts cents to USD with up to six decimal places (credits use up to four), while JSON retains the API numbers. `unitBudget`, `unitsUsed` and other unit fields replace the deprecated credit totals; update consumers accordingly.
+Read `unit` before interpreting amounts: `credits` for contract terms, `usdCents` for self-service terms. Summary/series `unit` may be null; do not invent a currency or combine unlike units. Human usage output converts cents to USD with up to six decimal places (credits use up to four), while JSON retains the API numbers. The old credit-total fields were removed/renamed, not retained as aliases; migrate consumers using this mapping (see [compatibility requirements](references/compatibility.md) for the release boundary):
 
-Pricing-rule keys such as `credits`, `annualCredits`, and calculation rates `appliedDailyCredits`/`appliedDailyCreditsPerBlock` retain their names but are interpreted in the term's unit. On `usdCents` terms their human labels say price and values are divided by 100; contract-only standard/premium conversion rows are hidden. Do not rename these remaining rate keys or confuse a pricing rule's quantity unit (such as runs) with the term's monetary unit.
+| Removed field | Current field |
+|---|---|
+| `creditBudget` | `unitBudget` |
+| `creditsUsed` | `unitsUsed` |
+| `remainingCredits` | `unitsRemaining` |
+| `budgetedDailyCredits` | `budgetedDailyUnits` |
+| `averageDailyCredits` | `averageDailyUnits` |
+| `projectedCreditsAtContractEnd` | `projectedUnitsAtContractEnd` |
+| `projectedRemainingCredits` | `projectedUnitsRemaining` |
+
+Pricing-rule fields `credits`, `price.annualCredits`, `block.annualCredits`, and calculation rate fields `appliedDailyCredits`/`appliedDailyCreditsPerBlock` retain their names but are interpreted in the term's unit. These are object fields, not `--pricing-rule` values or `breakdown[].pricingRuleKey` identifiers. On `usdCents` terms their human labels say price and values are divided by 100; contract-only standard/premium conversion rows are hidden. Do not rename these remaining rate fields or confuse a pricing rule's quantity unit (such as runs) with the term's monetary unit.
 
 These are abbreviated structural examples, not captured responses:
 

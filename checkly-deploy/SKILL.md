@@ -73,7 +73,7 @@ When web edits can be represented in code, the interactive prompt offers **Updat
 
 ## Properties owned by the deployment
 
-Omitted values are reset to the following defaults; omission does not preserve a web-only edit. Put intended settings into code before applying the plan.
+The following properties have explicit omission resets. Dashboard resets apply only to the listed text properties; other omitted Dashboard properties preserve stored values, including web-only edits. Put intended settings into code before applying the plan.
 
 | Resource | Defaults when omitted |
 |---|---|
@@ -82,7 +82,7 @@ Omitted values are reset to the following defaults; omission does not preserve a
 | Checks | Empty `description` and `intent`; `aiAutoRepairEnabled` follows the account setting. |
 | Alert channels | `sendRecovery: true`, `sendFailure: true`, `sendDegraded: false`, `sslExpiry: false`, `sslExpiryThreshold: 30`. |
 | `PrivateLocation` | No `proxyUrl`. |
-| `Dashboard` | Empty `customUrl`, `customDomain`, `logo`, `favicon`, `link`, `header`, `description`. The CLI 10.4.0+ display booleans are **not** explicit reset defaults: omitted `sortByStatus`, `showCheckRunLinks` and `showGroupNames` remain `undefined`. Set intended booleans explicitly rather than assuming omission resets stored values. |
+| `Dashboard` | Only the text properties are cleared: `logo` and `header` to `''`; `customUrl`, `customDomain`, `favicon`, `link`, `description` to `null`. All other omitted Dashboard properties preserve stored values (web edits included): tags, layout, refresh/pagination, display/privacy booleans and custom CSS. Set intended values explicitly. [Immutable synthesis and bundle sources](https://github.com/checkly/checkly-cli/tree/34833c407768368d6ce64c759a979aec029b732f/packages/cli/src/constructs). |
 | `MaintenanceWindow` | `timezone: 'UTC'`, no `repeatEndsAt`; changing timezone while active fails until it ends. |
 
 Removing `group` from a `PlaywrightCheck` also removes the deployed group membership. See `checkly-constructs` for removed-property migration and `shouldFail` restrictions.
