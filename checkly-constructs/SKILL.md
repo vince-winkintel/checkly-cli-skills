@@ -11,6 +11,31 @@ The Checkly constructs system provides type-safe abstractions for monitoring res
 
 Checks and monitors synthesize default degraded/max limits explicitly, matching backend defaults; absence of an ordering diagnostic is not proof that the API accepts the payload. Retired `me-south-1` is invalid in resource locations, shared `checks.locations` and `cli.runLocation`; remove or replace it. A Slack App alert channel with destinations fails validation if the account reports the app disconnected; connect it or remove the channel. Missing integration state skips this check, not proof of deliverability.
 
+## Dashboard display settings
+
+Checkly CLI **10.4.0+** exposes these optional booleans on `Dashboard`:
+
+| Property | Meaning | Documented default |
+|---|---|---|
+| `sortByStatus` | Show failing checks first | `false` |
+| `showCheckRunLinks` | Show links to check runs on each check's bar chart | `false` |
+| `showGroupNames` | Show group names | `true` |
+
+```typescript
+import { Dashboard } from 'checkly/constructs'
+
+new Dashboard('service-dashboard', {
+  customUrl: 'service-status',
+  sortByStatus: true,
+  showCheckRunLinks: true,
+  showGroupNames: false,
+})
+```
+
+The construct forwards supplied values to the deploy payload and leaves omitted booleans `undefined`; it does not explicitly send the documented default values. Do not assume omission resets an existing stored value or web edit. Put the intended booleans explicitly in code and review the deployment plan. Import/codegen emits each property when it is not `undefined`, preserving explicit `false`. Deploy write-back can offer web edits to these properties for code review; this does not bypass normal deploy authorization.
+
+Source-backed semantics, not a help capture: [construct](https://github.com/checkly/checkly-cli/blob/34833c407768368d6ce64c759a979aec029b732f/packages/cli/src/constructs/dashboard.ts), [codegen](https://github.com/checkly/checkly-cli/blob/34833c407768368d6ce64c759a979aec029b732f/packages/cli/src/constructs/dashboard-codegen.ts), and [write-back rules](https://github.com/checkly/checkly-cli/blob/34833c407768368d6ce64c759a979aec029b732f/packages/cli/src/services/write-back/plan.ts).
+
 ## Core concepts
 
 ### Construct hierarchy

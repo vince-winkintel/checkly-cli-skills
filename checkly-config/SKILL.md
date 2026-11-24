@@ -96,6 +96,8 @@ Constructs may be declared directly in `checkly.config.*`. The CLI records that 
 
 ## Deployment defaults and runtime diagnostics
 
+Dashboard display settings belong on the `Dashboard` construct, not a new `checkly.config.ts` key. CLI **10.4.0+** accepts `sortByStatus` (default `false`, failing checks first), `showCheckRunLinks` (default `false`, bar-chart run links), and `showGroupNames` (default `true`). Set intended booleans explicitly; the CLI leaves omitted booleans `undefined`, so omission must not be treated as a guaranteed reset of stored values. [Immutable construct source](https://github.com/checkly/checkly-cli/blob/34833c407768368d6ce64c759a979aec029b732f/packages/cli/src/constructs/dashboard.ts).
+
 Deploy owns every property in code. Omitting description/intent clears it; omitting automatic repair restores account inheritance. Retry defaults and alert-channel/dashboard/private-location/maintenance resets are listed in `checkly-deploy`; review the plan before applying web-only values that code would reset.
 
 `checks.shouldFail` applies only to `ApiCheck`, `UrlMonitor` and `TcpMonitor`. It does not invert other check types. Migration warning: remove `checks.browserChecks.shouldFail` and `checks.multiStepChecks.shouldFail`, even when false. Other types that previously inherited true now deploy false, changing their pass/fail interpretation.

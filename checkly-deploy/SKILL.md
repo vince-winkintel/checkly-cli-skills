@@ -82,7 +82,7 @@ Omitted values are reset to the following defaults; omission does not preserve a
 | Checks | Empty `description` and `intent`; `aiAutoRepairEnabled` follows the account setting. |
 | Alert channels | `sendRecovery: true`, `sendFailure: true`, `sendDegraded: false`, `sslExpiry: false`, `sslExpiryThreshold: 30`. |
 | `PrivateLocation` | No `proxyUrl`. |
-| `Dashboard` | Empty `customUrl`, `customDomain`, `logo`, `favicon`, `link`, `header`, `description`. |
+| `Dashboard` | Empty `customUrl`, `customDomain`, `logo`, `favicon`, `link`, `header`, `description`. The CLI 10.4.0+ display booleans are **not** explicit reset defaults: omitted `sortByStatus`, `showCheckRunLinks` and `showGroupNames` remain `undefined`. Set intended booleans explicitly rather than assuming omission resets stored values. |
 | `MaintenanceWindow` | `timezone: 'UTC'`, no `repeatEndsAt`; changing timezone while active fails until it ends. |
 
 Removing `group` from a `PlaywrightCheck` also removes the deployed group membership. See `checkly-constructs` for removed-property migration and `shouldFail` restrictions.
