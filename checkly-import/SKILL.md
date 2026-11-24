@@ -189,6 +189,10 @@ Commit or stash intentional local work first, regenerate the plan in a clean bra
 
 Canceling removes the pending links but does not roll back changes already deployed to live resources. Inspect the deployed state and use an explicit corrective deployment only after review.
 
+## Dashboard display settings
+
+With CLI **10.4.0+**, dashboard import/codegen preserves `sortByStatus`, `showCheckRunLinks`, and `showGroupNames`, including explicit `false`; absent values are omitted. Review generated code before deploy. The documented defaults are `false`, `false`, `true` respectively, but the construct leaves omitted booleans `undefined`; do not assume removing a property resets an existing stored value. Set the intended values explicitly. [Immutable codegen source](https://github.com/checkly/checkly-cli/blob/34833c407768368d6ce64c759a979aec029b732f/packages/cli/src/constructs/dashboard-codegen.ts).
+
 ## Related skills
 
 - See `checkly-deploy` for preview and deployment deletion safety.

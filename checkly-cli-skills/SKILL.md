@@ -1,6 +1,6 @@
 ---
 name: checkly-cli-skills
-description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, GitHub Check re-runs, gRPC/SSL/traceroute monitors, check deployment, account plans, entitlements, organization usage, credits, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, monitors, testing, deployment, imports, account plan and usage, constructs, and advanced patterns. Triggers on checkly, GitHub Check Re-run button, repository_dispatch, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
+description: Comprehensive Checkly CLI command reference and Monitoring as Code workflows. Use when user mentions Checkly CLI, monitoring as code, synthetic monitoring, API checks, browser checks, Playwright testing, GitHub Check re-runs, gRPC/SSL/traceroute monitors, check deployment, account plans, entitlements, organization usage, credits, spending caps, or npx checkly commands. Routes to specialized sub-skills for auth, config, checks, monitors, testing, deployment, imports, account plan and usage, constructs, and advanced patterns. Triggers on checkly, GitHub Check Re-run button, repository_dispatch, monitoring as code, synthetic monitoring, checkly cli, npx checkly.
 metadata:
   {
     "openclaw":
@@ -109,7 +109,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 - `checkly-auth` - Authentication setup and login
 - `checkly-config` - Configuration files (checkly.config.ts) and project structure
 - `checkly-members` - Account member and pending-invite listing, role updates, and removals
-- `checkly-usage` - Account plan/entitlements plus organization contract terms, credit usage, projections, and grouped usage series
+- `checkly-usage` - Account plans, contract/self-service usage and projections, grouped series, and authorized spending-cap changes
 
 **Core Workflows:**
 - `checkly-test` - Local testing workflow with npx checkly test
@@ -128,7 +128,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 
 **Operations:**
 - `checkly-members` - Audit and manage Checkly account access with `npx checkly members`
-- `checkly-usage` - Route account questions precisely: `npx checkly account plan` for plans, entitlements, feature limits, or private-location availability; `npx checkly account usage terms/term/summary/series/projections` for organization contract credits and consumption
+- `checkly-usage` - Route account questions precisely: `npx checkly account plan` for plans, entitlements, feature limits, or private-location availability; `npx checkly account usage terms/term/summary/series/projections` for contract/self-service consumption; `npx checkly account spending-cap` for overage limits, requiring explicit exact-account/value or removal authorization before writes
 - `checkly-test` - Also covers `npx checkly test-sessions` for recorded test-session drilldown and RCA context
 - `checkly-checks` - Inspect, run, and delete deployed checks with `npx checkly checks`; confirm live-run targets before `checks run`, and use `checks delete --dry-run` before destructive deletes
 - `checkly-assets` - List/download result assets such as logs, traces, videos, screenshots, pcap, reports, and files for failure investigation
@@ -401,7 +401,7 @@ npx checkly skills configure api-checks
 npx checkly skills install
 ```
 
-This repository is an external multi-skill package for agent clients. Use the bundled `skills` command when inspecting or installing upstream guidance. File read/write failures exit 1.
+This repository is an external multi-skill package for agent clients. Use the bundled `skills` command when inspecting or installing upstream guidance. File read/write failures exit 1. In CLI **10.3.0+**, upstream installer targets also include `kiro` (`.kiro/skills/checkly`) and `antigravity`, `devin`, `mistral-vibe`, `zed`, `kilo-code` (each `.agents/skills/checkly`). These are upstream single-skill destinations, separate from this repository's selective installation. Installation or overwrite requires user authorization; this reference does not authorize either. [Immutable target map](https://github.com/checkly/checkly-cli/blob/c58d58c171152336dfc87f2e7b77e742f9b4ffa5/packages/cli/src/services/skills.ts).
 
 ## Installation methods
 
@@ -442,7 +442,7 @@ checkly test
 - See `checkly-auth` for authentication setup
 - See `checkly-config` for project configuration
 - See `checkly-test` for local testing workflow
-- See `checkly-usage` for account plans, entitlements, contract credits, and usage reporting
+- See `checkly-usage` for account plans, entitlements, contract credits, self-service USD usage, usage reporting, and spending caps
 
 **Creating checks:**
 - See `checkly-checks` for API and browser checks
