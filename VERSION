@@ -1,8 +1,14 @@
-1.0.23
+1.0.24
 
 Release/version change metadata for this skill set lives here, not in individual skill files.
 
 Historical notes consolidated from skill docs:
+
+- checkly-cli v10.5.0
+  - Reviewed all five commits and 30 changed source leaves from 10.4.0 against official source 0d8b571a18ee1ef2a35b6ac991349ab2abdb4384; supplied evidence verifies all 1823 Git blobs.
+  - Documented visible core validate, project-code execution and authenticated read-API boundaries, spinner/diagnostic order, managed alert integration entitlement refusal, Slack connection versus entitlement, exemptions and API-not-reported behavior. Channel removals and plan changes require explicit approval; no gate bypass or automatic purchase.
+  - Documented GitHub reporter empty Link cells for run errors and missing Filename placeholders. Assessed help/parser/minimatch/indent-string, TypeScript ESLint, pnpm and lockfile updates plus write-back type-only adaptations; no new operator workflow or compatibility-floor change is warranted.
+  - Source-backed summaries only: no new binary or exact help capture. Preserved historical provenance, compatibility minima and frontmatter schema. Offline static verification only; runtime scripts and inherited publication/security concerns remain outside this refresh.
 
 - checkly-cli v10.3.0-v10.4.0
   - Reviewed all 9 cumulative commits and 38 changed source leaves since 10.2.0 against Git-blob-verified official source 34833c407768368d6ce64c759a979aec029b732f. Official interrelease comparison identifies 10.3.0 as c58d58c171152336dfc87f2e7b77e742f9b4ffa5 and isolates the five dashboard leaves in 10.4.0.

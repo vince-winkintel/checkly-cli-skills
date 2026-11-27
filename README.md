@@ -16,7 +16,7 @@ npx skills add vince-winkintel/checkly-cli-skills
 
 ### Getting Started
 - **[checkly-auth](./checkly-auth)** - Authentication and login
-- **[checkly-config](./checkly-config)** - Configuration files and project setup
+- **[checkly-config](./checkly-config)** - Configuration files, project validation and alert integration entitlements
 - **[checkly-members](./checkly-members)** - Account member and pending-invite listing, role updates, and removals
 - **[checkly-usage](./checkly-usage)** - Account plans, contract/self-service usage and projections, grouped series, and authorized spending-cap changes
 

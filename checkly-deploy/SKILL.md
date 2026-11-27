@@ -7,9 +7,15 @@ description: Deploy Checkly checks to production with npx checkly deploy, includ
 
 Deploy project definitions to Checkly with a reviewed, property-level plan. These commands contact Checkly; `validate` checks configuration but is not a deploy preview.
 
+`npx checkly validate` authenticates, reads account/runtime APIs, and loads and executes project/config code. It does not deploy resources or run checks, but it is not isolated, offline, or universally side-effect-free. Review project code and authorize its execution and API access before invoking it.
+
+CLI **10.5.0+** refuses managed alert channels with `Integration not included in your plan` when the account reports their integration as `entitled: false`, including previously deployed channels. This blocks `validate`, `test`, `pw-test` and deploy planning. Slack `connected` and `entitled` are separate: a connected app can still be refused, and a disconnected, unentitled app can report both errors. Email, plain webhook channels and `AlertChannel.fromId()` references are exempt from this entitlement check. An omitted integration or `entitled` field skips it; absence of a diagnostic is not proof that alerts work. Never bypass the gate by changing channel type, reference style or validation behavior. Obtain explicit approval before removing alert channels or changing plans; never automatically upgrade or pay.
+
+[Immutable validation source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/commands/validate.ts) and [entitlement source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/constructs/alert-channel.ts).
+
 ## Review and apply
 
-Validation can stop planning: a `SlackAppAlertChannel` with destinations requires a connected Checkly Slack app when the account API reports its state. This includes channels deployed before disconnection; connect the app or remove the channel. Remove retired `me-south-1` from checks, monitors, groups, `checks.locations` and `cli.runLocation`. These checks also apply to `validate`, `test` and `pw-test`.
+Validation can stop planning: a `SlackAppAlertChannel` with destinations requires a connected Checkly Slack app when the account API reports its state. This includes channels deployed before disconnection; confirm the intended account before connecting the app; channel removal requires explicit approval. Remove retired `me-south-1` from checks, monitors, groups, `checks.locations` and `cli.runLocation`. These checks also apply to `validate`, `test` and `pw-test`.
 
 Checks and monitors send their default degraded/max limits explicitly, matching existing backend defaults rather than changing unset deployed limits. Review any baseline or payload-format changes in the plan; ICMP and traceroute validation compares explicit values with effective defaults (see `checkly-monitors`).
 

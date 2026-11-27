@@ -9,7 +9,11 @@ The Checkly constructs system provides type-safe abstractions for monitoring res
 
 ## Validation boundaries
 
-Checks and monitors synthesize default degraded/max limits explicitly, matching backend defaults; absence of an ordering diagnostic is not proof that the API accepts the payload. Retired `me-south-1` is invalid in resource locations, shared `checks.locations` and `cli.runLocation`; remove or replace it. A Slack App alert channel with destinations fails validation if the account reports the app disconnected; connect it or remove the channel. Missing integration state skips this check, not proof of deliverability.
+Checks and monitors synthesize default degraded/max limits explicitly, matching backend defaults; absence of an ordering diagnostic is not proof that the API accepts the payload. Retired `me-south-1` is invalid in resource locations, shared `checks.locations` and `cli.runLocation`; remove or replace it. A Slack App alert channel with destinations fails validation if the account reports the app disconnected; confirm the intended account before connecting it; channel removal requires explicit approval. Missing integration state skips this check, not proof of deliverability.
+
+CLI **10.5.0+** refuses managed alert channels with `Integration not included in your plan` when the account reports their integration as `entitled: false`, including previously deployed channels. This blocks `validate`, `test`, `pw-test` and deploy planning. Slack `connected` and `entitled` are separate: a connected app can still be refused, and a disconnected, unentitled app can report both errors. Email, plain webhook channels and `AlertChannel.fromId()` references are exempt from this entitlement check. An omitted integration or `entitled` field skips it; absence of a diagnostic is not proof that alerts work. Never bypass the gate by changing channel type, reference style or validation behavior. Obtain explicit approval before removing alert channels or changing plans; never automatically upgrade or pay.
+
+[Immutable entitlement source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/constructs/alert-channel.ts), [webhook mapping](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/constructs/webhook-alert-channel.ts), and [Slack checks](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/constructs/slack-app-alert-channel.ts).
 
 ## Dashboard display settings
 
