@@ -92,6 +92,8 @@ Writes a Markdown summary to `./checkly-github-report.md`, or the path in
 `CHECKLY_REPORTER_GITHUB_OUTPUT`. It does not emit GitHub Actions annotations or
 configure a Checkly GitHub Check's Re-run button.
 
+When a session supplies a `Link` column, a run-error row without a result ID retains an empty link cell. If any row needs a `Filename` column, missing source files render as `-` for both completed and unfinished checks. These are source-backed output semantics, not captured help or binary output. [Immutable reporter source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/reporters/github.ts).
+
 ### CI reporter
 
 ```bash

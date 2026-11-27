@@ -58,6 +58,8 @@ A global CLI, `pnpm dlx checkly`, or version-qualified `npx checkly` delegates t
 `init` can initialize an empty directory in CI/agent mode, including creating package.json. Agent output uses `status: "success"` or `status: "error"` with `message`; failures exit 1. `api` preserves binary bytes and JSON string/null responses; `--jq` requires JSON.
 
 
+`validate` is listed as a core command in CLI **10.5.0+**. Route project validation and alert integration refusal to `checkly-config`. `npx checkly validate` authenticates, reads account/runtime APIs, and loads and executes project/config code. It does not deploy resources or run checks, but it is not isolated, offline, or universally side-effect-free. Review project code and authorize its execution and API access before invoking it.
+
 ## Choose CLI or MCP first
 
 This skill pack drives `npx checkly` in a shell. Use the CLI for authoring, testing, importing, and deploying Monitoring as Code. Checkly MCP covers only a subset of live-account work: check status/results, test sessions, root-cause analysis, triggering deployed checks, and incidents.
@@ -107,7 +109,7 @@ This skill routes to specialized sub-skills by Checkly domain:
 
 **Getting Started:**
 - `checkly-auth` - Authentication setup and login
-- `checkly-config` - Configuration files (checkly.config.ts) and project structure
+- `checkly-config` - Configuration files (checkly.config.ts), project validation and alert integration entitlements
 - `checkly-members` - Account member and pending-invite listing, role updates, and removals
 - `checkly-usage` - Account plans, contract/self-service usage and projections, grouped series, and authorized spending-cap changes
 

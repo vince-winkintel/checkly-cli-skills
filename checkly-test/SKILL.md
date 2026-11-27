@@ -291,6 +291,8 @@ npx checkly test --reporter=github
 # Writes ./checkly-github-report.md (override with CHECKLY_REPORTER_GITHUB_OUTPUT)
 ```
 
+When a session supplies a `Link` column, a run-error row without a result ID retains an empty link cell. If any row needs a `Filename` column, missing source files render as `-` for both completed and unfinished checks. These are source-backed output semantics, not captured help or binary output. [Immutable reporter source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/reporters/github.ts).
+
 ### JSON reporter
 
 JSON is written to `./checkly-json-report.json` (override with `CHECKLY_REPORTER_JSON_OUTPUT`). Parse that file; stdout contains a brief summary, saved-file notice and session URL, not the JSON report. Keep stderr separate for progress and diagnostics.
@@ -303,9 +305,17 @@ npx checkly test --reporter=json
 
 For failed gRPC, SSL, and traceroute monitors, terminal and JSON reporters include type-specific diagnostics when available. Inspect gRPC status/health/metadata, TLS certificate and handshake details, or traceroute hops/latency/packet loss before falling back to generic network troubleshooting.
 
+## Validation before testing
+
+`npx checkly validate` authenticates, reads account/runtime APIs, and loads and executes project/config code. It does not deploy resources or run checks, but it is not isolated, offline, or universally side-effect-free. Review project code and authorize its execution and API access before invoking it.
+
+CLI **10.5.0+** refuses managed alert channels with `Integration not included in your plan` when the account reports their integration as `entitled: false`, including previously deployed channels. This blocks `validate`, `test`, `pw-test` and deploy planning. Slack `connected` and `entitled` are separate: a connected app can still be refused, and a disconnected, unentitled app can report both errors. Email, plain webhook channels and `AlertChannel.fromId()` references are exempt from this entitlement check. An omitted integration or `entitled` field skips it; absence of a diagnostic is not proof that alerts work. Never bypass the gate by changing channel type, reference style or validation behavior. Obtain explicit approval before removing alert channels or changing plans; never automatically upgrade or pay.
+
+[Immutable validation source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/commands/validate.ts) and [entitlement source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/constructs/alert-channel.ts).
+
 ## Testing strategies
 
-Before running, resolve configuration errors: retired `me-south-1` in locations/defaults is rejected, and `--location me-south-1` fails with exit 2. A `SlackAppAlertChannel` with destinations fails when the account reports the Checkly Slack app as disconnected; connect the app or remove the channel. The same validation applies to `validate`, `deploy` and `pw-test`.
+Before running, resolve configuration errors: retired `me-south-1` in locations/defaults is rejected, and `--location me-south-1` fails with exit 2. A `SlackAppAlertChannel` with destinations fails when the account reports the Checkly Slack app as disconnected; confirm the intended account before connecting the app; channel removal requires explicit approval. The same validation applies to `validate`, `deploy` and `pw-test`.
 
 If `test`, `pw-test` or `trigger` cannot connect to the result stream, the error identifies the Checkly connection failure and includes its cause in `Details`, including per-address causes from an aggregate connection error. Diagnose connectivity/proxy/broker configuration; an MQTT transport failure is not a failed assertion. Errors while processing results or reporter callbacks fail the run rather than escaping as unhandled queue/timer errors. Once the run stops, pending timers and queued results are cleared.
 

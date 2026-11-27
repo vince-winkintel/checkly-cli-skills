@@ -7,9 +7,13 @@ description: Configure Playwright test suites with Checkly including playwright.
 
 Run full Playwright test suites as Checkly checks.
 
-`pw-test` validates the project: remove retired `me-south-1` from locations/defaults, and resolve any `SlackAppAlertChannel` with destinations whose account reports a disconnected Checkly Slack app. Connect the app or remove the channel. An explicit `--location me-south-1` fails with exit 2, including before `--create-check` can write that location. Missing Slack integration state in an API response skips that check.
+`pw-test` validates the project: remove retired `me-south-1` from locations/defaults, and resolve any `SlackAppAlertChannel` with destinations whose account reports a disconnected Checkly Slack app. Confirm the intended account before connecting the app; channel removal requires explicit approval. An explicit `--location me-south-1` fails with exit 2, including before `--create-check` can write that location. Missing Slack integration state in an API response skips that check.
 
 The `github`/`json` reporters send completed-check counters and retried-attempt progress to stderr, leaving their summary/report formats unchanged. Only one file reporter supplies progress; `list`, `dot` or `ci` takes over when present. An MQTT connection failure now includes the underlying causes in `Details`; diagnose result-stream connectivity before changing test assertions.
+
+CLI **10.5.0+** refuses managed alert channels with `Integration not included in your plan` when the account reports their integration as `entitled: false`, including previously deployed channels. This blocks `validate`, `test`, `pw-test` and deploy planning. Slack `connected` and `entitled` are separate: a connected app can still be refused, and a disconnected, unentitled app can report both errors. Email, plain webhook channels and `AlertChannel.fromId()` references are exempt from this entitlement check. An omitted integration or `entitled` field skips it; absence of a diagnostic is not proof that alerts work. Never bypass the gate by changing channel type, reference style or validation behavior. Obtain explicit approval before removing alert channels or changing plans; never automatically upgrade or pay.
+
+[Immutable entitlement source](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/constructs/alert-channel.ts) and [Slack checks](https://github.com/checkly/checkly-cli/blob/0d8b571a18ee1ef2a35b6ac991349ab2abdb4384/packages/cli/src/constructs/slack-app-alert-channel.ts).
 
 ## Playwright Check Suite
 

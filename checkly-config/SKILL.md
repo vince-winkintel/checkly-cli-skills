@@ -86,6 +86,12 @@ export default defineConfig({
 
 This runner-level setting applies to the one code bundle shared by all Playwright Check Suites. An unset or empty-string value leaves the cache key unchanged, so an optional environment variable is safe. Migration warning: `caching` is removed and fails configuration loading. Replace `caching.dependencyCache.version` with `runner.cache.install.version` and ensure every environment uses a CLI that supports the current setting. For one ad-hoc reinstall, use `--refresh-cache` with `checkly test`, `checkly pw-test`, `checkly trigger`, or `checkly checks run` instead of changing committed configuration.
 
+## Project validation
+
+`npx checkly validate` authenticates, reads account/runtime APIs, and loads and executes project/config code. It does not deploy resources or run checks, but it is not isolated, offline, or universally side-effect-free. Review project code and authorize its execution and API access before invoking it.
+
+For the visible core command, flags, diagnostic order, alert entitlement refusal and exemptions, read [project validation](references/validation.md).
+
 ## Configuration validation diagnostics
 
 Commands that load `checkly.config.*` collect configuration problems and render them with config-file attribution instead of stopping at the first error. `test`, `pw-test`, `validate`, `deploy`, and `import plan` show config diagnostics before project or construct diagnostics; fatal config diagnostics exit with status 1. Read and fix the full set before rerunning rather than addressing only the first line.
@@ -104,7 +110,7 @@ Deploy writes properties carried in its payload; omission behavior is resource- 
 
 Deploy and validate warn when a check has neither public nor private locations after defaults/group settings are resolved. Set `checks.locations`, `checks.privateLocations`, or explicit group/check locations. The warning does not block deployment.
 
-A `SlackAppAlertChannel` with nonempty `slackChannels` fails `validate`, `deploy`, `test` and `pw-test` when the account reports the Checkly Slack app as disconnected, including previously deployed channels. Connect the app in the account integration settings or remove the channel. If the API omits Slack integration state, this check is skipped; that does not establish deliverability.
+A `SlackAppAlertChannel` with nonempty `slackChannels` fails `validate`, `deploy`, `test` and `pw-test` when the account reports the Checkly Slack app as disconnected, including previously deployed channels. Confirm the intended account before connecting the app; removing the channel requires explicit approval. Connection does not establish plan entitlement; see [validation rules](references/validation.md). If the API omits Slack integration state, this check is skipped; that does not establish deliverability.
 
 The native `oxc-parser` reads TypeScript without loading the project's TypeScript compiler, including projects using TypeScript 7. Stricter syntax parsing rejects constructs such as an uninitialized `const` or `await` as an identifier; accessor class fields are supported. A missing platform-native parser package requires reinstalling dependencies with optional packages on the target OS, rather than copying `node_modules` across systems. Malformed `tsconfig.json` is ignored as absent; validate its syntax independently when module/path settings matter.
 
